@@ -27,3 +27,10 @@ ping
 ```bash
 docker lgs -f my-redis-container
 ```
+
+## How to run Multiple Meteor Instances
+
+```bash
+MONGO_URL=mongodb://localhost:27017/redis-issues meteor run --port 3000 --settings settings.json
+MONGO_URL=mongodb://localhost:27017/redis-issues meteor run --port 3005 --settings settings.json
+```
