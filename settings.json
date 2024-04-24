@@ -4,9 +4,9 @@
     "debugOptions": {
       "prefix":"reactivityTracker:",
       "verboseAdvancedDebug": false,
-      "allFieldsMustMatch": false,
+      "allFieldsMustMatch": true,
+      "matchEmptyData": false,
       "debugFieldsToFilter": {
-        "channel": "links",
         "collectionName": "links",
         "docId": "JgYhTbnwQ85Xs8Dgr"
       }

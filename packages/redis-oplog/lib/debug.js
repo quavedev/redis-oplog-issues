@@ -13,7 +13,10 @@ export default (message, trace = false) => {
   }
 };
 
+const logMessage = (...args) => console.debug(...args);
+const logError = (...args) => console.error(...args);
 const currentPackage = 'redis-oplog';
+
 /**
  * This function is shared between packages.
  *
@@ -63,7 +66,7 @@ export const advancedDebug = ({ log, trace = false, error, ...data }) => {
   const dataAsString = `${JSON.stringify(preparedData, null, 2)}`;
 
   if (error) {
-    console.error(`${logPrefix}, data: ${dataAsString}`, error);
+    logError(`${logPrefix}, data: ${dataAsString}`, error);
   }
 
   const debugSpecificFieldValues = !!Object.keys(debugFieldsToFilter).length;
@@ -82,7 +85,7 @@ export const advancedDebug = ({ log, trace = false, error, ...data }) => {
         !Object.entries(debugFieldsToFilter).some(match)
     ) {
       if (verboseAdvancedDebug) {
-        console.log(`${logPrefix} not a single match, data: ${dataAsString}`);
+        logMessage(`${logPrefix} not a single match, data: ${dataAsString}`);
       }
       return;
     }
@@ -93,7 +96,7 @@ export const advancedDebug = ({ log, trace = false, error, ...data }) => {
         !Object.entries(debugFieldsToFilter).every(match)
     ) {
       if (verboseAdvancedDebug) {
-        console.log(`${logPrefix} not all match, data: ${dataAsString}`);
+        logMessage(`${logPrefix} not all match, data: ${dataAsString}`);
       }
       return;
     }
@@ -104,11 +107,11 @@ export const advancedDebug = ({ log, trace = false, error, ...data }) => {
           .filter(match)
           .map(([key, value]) => `${key}: ${value}`)
       : "";
-  console.debug(
+  logMessage(
       `${logPrefix} match={${emptyDataIsMatch ? "empty" : matchedFields}}, data: ${dataAsString}`,
   );
 
   if (trace) {
-    console.debug(trace);
+    logMessage(trace);
   }
 };

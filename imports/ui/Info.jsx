@@ -72,6 +72,7 @@ export const Info = () => {
               >
                 {link.title} <span className="text-xs">({link.updatedAt?.toLocaleString() || ''})</span>
               </a>
+              <div>[{link._id}]</div>
             </li>
         ))}
       </ul>

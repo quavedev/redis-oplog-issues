@@ -11,7 +11,10 @@ const getRedisOplogConfigJsonOrNull = () => {
 
 const redisOplogConfig = getRedisOplogConfigJsonOrNull();
 
+const logMessage = (...args) => console.debug(...args);
+const logError = (...args) => console.error(...args);
 const currentPackage = 'ddp-server';
+
 /**
  * This function is shared between packages.
  *
@@ -41,10 +44,10 @@ export const advancedDebug = ({ log, trace = false, error, ...data }) => {
         collectionName: data.cursorDescription.collectionName,
       }),
       ...(data.cursorDescription.selector && {
-          selector: data.cursorDescription.selector,
+        selector: data.cursorDescription.selector,
       }),
       ...(data.cursorDescription.options?.sort && {
-          sort: data.cursorDescription.options.sort,
+        sort: data.cursorDescription.options.sort,
       }),
     }),
   };
@@ -61,7 +64,7 @@ export const advancedDebug = ({ log, trace = false, error, ...data }) => {
   const dataAsString = `${JSON.stringify(preparedData, null, 2)}`;
 
   if (error) {
-    console.error(`${logPrefix}, data: ${dataAsString}`, error);
+    logError(`${logPrefix}, data: ${dataAsString}`, error);
   }
 
   const debugSpecificFieldValues = !!Object.keys(debugFieldsToFilter).length;
@@ -75,38 +78,38 @@ export const advancedDebug = ({ log, trace = false, error, ...data }) => {
 
   if (debugSpecificFieldValues) {
     if (
-      !emptyDataIsMatch &&
-      !allFieldsMustMatch &&
-      !Object.entries(debugFieldsToFilter).some(match)
+        !emptyDataIsMatch &&
+        !allFieldsMustMatch &&
+        !Object.entries(debugFieldsToFilter).some(match)
     ) {
       if (verboseAdvancedDebug) {
-        console.log(`${logPrefix} not a single match, data: ${dataAsString}`);
+        logMessage(`${logPrefix} not a single match, data: ${dataAsString}`);
       }
       return;
     }
 
     if (
-      !emptyDataIsMatch &&
-      allFieldsMustMatch &&
-      !Object.entries(debugFieldsToFilter).every(match)
+        !emptyDataIsMatch &&
+        allFieldsMustMatch &&
+        !Object.entries(debugFieldsToFilter).every(match)
     ) {
       if (verboseAdvancedDebug) {
-        console.log(`${logPrefix} not all match, data: ${dataAsString}`);
+        logMessage(`${logPrefix} not all match, data: ${dataAsString}`);
       }
       return;
     }
   }
 
   const matchedFields = debugSpecificFieldValues
-    ? Object.entries(debugFieldsToFilter)
-        .filter(match)
-        .map(([key, value]) => `${key}: ${value}`)
-    : "";
-  console.debug(
+      ? Object.entries(debugFieldsToFilter)
+          .filter(match)
+          .map(([key, value]) => `${key}: ${value}`)
+      : "";
+  logMessage(
       `${logPrefix} match={${emptyDataIsMatch ? "empty" : matchedFields}}, data: ${dataAsString}`,
   );
 
   if (trace) {
-    console.debug(trace);
+    logMessage(trace);
   }
 };

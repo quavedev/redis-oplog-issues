@@ -29,7 +29,7 @@ ping
 ## Check Redis logs
 
 ```bash
-docker lgs -f my-redis-container
+docker logs -f my-redis-container
 ```
 
 ## How to run Multiple Meteor Instances
