@@ -1,6 +1,10 @@
 # Redis Oplog Issues
 
-App to validate new logs in Redis Oplog and DDP Server.
+App to validate new logs in Redis Oplog and DDP Server packages.
+
+This is a small app with easy ways in the UI to do inserts and removes.
+
+Also, updates by id, by another field, and multi updates.
 
 ## How to run Redis
 
