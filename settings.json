@@ -1,0 +1,15 @@
+{
+  "redisOplog": {
+    "debug": true,
+    "debugOptions": {
+      "prefix":"reactivityTracker:",
+      "verboseAdvancedDebug": false,
+      "allFieldsMustMatch": false,
+      "debugFieldsToFilter": {
+        "channel": "links",
+        "collectionName": "links",
+        "docId": "JgYhTbnwQ85Xs8Dgr"
+      }
+    }
+  }
+}
