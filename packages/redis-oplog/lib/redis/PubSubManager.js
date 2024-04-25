@@ -1,5 +1,5 @@
 import { getRedisListener, getRedisPusher } from './getRedisClient';
-import { advancedDebug } from '../debug';
+import { getAdvancedDebug } from 'meteor/advanced-debug';
 
 /**
  * Manages communication with Redis
@@ -71,7 +71,7 @@ export default class PubSubManager {
     this.listener.on(
       'message',
       Meteor.bindEnvironment(function (channel, _message) {
-        advancedDebug({
+        getAdvancedDebug('redis-oplog')({
           log: 'PubSubManager._initMessageListener on message',
           channel,
           _message,
@@ -83,7 +83,7 @@ export default class PubSubManager {
           });
           return;
         }
-        advancedDebug({
+        getAdvancedDebug('redis-oplog')({
           log: 'PubSubManager._initMessageListener on message no channelHandlers',
           channel,
           _message,

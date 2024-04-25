@@ -1,5 +1,5 @@
 import { Events } from '../constants';
-import { advancedDebug } from '../debug';
+import { getAdvancedDebug } from 'meteor/advanced-debug';
 
 /**
  * @param observableCollection
@@ -28,7 +28,7 @@ export default function (observableCollection, event, doc, modifiedFields) {
  * @param doc
  */
 const handleInsert = function (observableCollection, doc) {
-  advancedDebug({
+  getAdvancedDebug('redis-oplog')({
     log: 'default processor, handleInsert',
     doc,
     docId: doc._id,
@@ -49,7 +49,7 @@ const handleInsert = function (observableCollection, doc) {
  * @param modifiedFields
  */
 const handleUpdate = function (observableCollection, doc, modifiedFields) {
-  advancedDebug({
+  getAdvancedDebug('redis-oplog')({
     log: 'default processor, handleUpdate',
     doc,
     docId: doc._id,

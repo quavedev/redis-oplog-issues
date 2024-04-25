@@ -1,3 +1,4 @@
+import '../imports/log';
 import { Meteor } from 'meteor/meteor';
 import { insertLink, LinksCollection } from '/imports/api/links';
 

@@ -1,7 +1,7 @@
 import { Events } from '../constants';
 import { hasSortFields } from './lib/fieldsExist';
 import requery from './actions/requery';
-import debug, { advancedDebug } from '../debug';
+import { getAdvancedDebug } from 'meteor/advanced-debug';
 
 /**
  * @param observableCollection
@@ -30,7 +30,7 @@ export default function (observableCollection, event, doc, modifiedFields) {
  * @param doc
  */
 const handleInsert = function (observableCollection, doc) {
-  advancedDebug({
+  getAdvancedDebug('redis-oplog')({
     log: 'limit-sort processor, handleInsert',
     doc,
     docId: doc._id,
@@ -47,12 +47,14 @@ const handleInsert = function (observableCollection, doc) {
  * @param modifiedFields
  */
 const handleUpdate = function (observableCollection, doc, modifiedFields) {
-  advancedDebug({
+  getAdvancedDebug('redis-oplog')({
     log: 'limit-sort processor, handleUpdate',
     doc,
     docId: doc._id,
     collectionContains: observableCollection.contains(doc._id),
     isEligible: observableCollection.isEligible(doc),
+    modifiedFields,
+    observableCollectionOptions: observableCollection?.options,
     hasSortFields: hasSortFields(
       observableCollection?.options?.sort,
       modifiedFields

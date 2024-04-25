@@ -10,6 +10,7 @@ Npm.depends({
 });
 
 Package.onUse(function (api) {
+  api.use('advanced-debug');
   api.use(
     [
       'check',

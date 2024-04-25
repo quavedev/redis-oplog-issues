@@ -1,7 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
 import { _ } from 'meteor/underscore';
-import debug, { advancedDebug } from '../debug';
+import { getAdvancedDebug } from 'meteor/advanced-debug';
 import { RedisPipe, Events } from '../constants';
 import getFieldsOfInterestFromAll from './lib/getFieldsOfInterestFromAll';
 import Config from '../config';
@@ -109,7 +109,7 @@ class RedisSubscriptionManager {
    * @param [fromRedis=false]
    */
   process(channel, data, fromRedis) {
-    advancedDebug({
+    getAdvancedDebug('redis-oplog')({
       log: 'RedisSubscriptionManager.process.start',
       docId: data?.d?._id,
       channel,
@@ -119,13 +119,13 @@ class RedisSubscriptionManager {
     // messages from redis that contain our uid were handled
     // optimistically, so we can drop them.
     if (fromRedis && data[RedisPipe.UID] === this.uid) {
-      advancedDebug({ log: 'uid dropped', docId: data?.d?._id, channel });
+      getAdvancedDebug('redis-oplog')({ log: 'uid dropped', docId: data?.d?._id, channel });
       return;
     }
 
     const subscribers = this.store[channel];
     if (!subscribers) {
-      advancedDebug({
+      getAdvancedDebug('redis-oplog')({
         log: 'subscriber not found ',
         docId: data?.d?._id,
         channel,
@@ -142,11 +142,11 @@ class RedisSubscriptionManager {
     );
 
     if (subscribers.length === 0) {
-      advancedDebug({ log: 'empty subscriber ', docId: data?.d?._id, channel });
+      getAdvancedDebug('redis-oplog')({ log: 'empty subscriber ', docId: data?.d?._id, channel });
       return;
     }
 
-    advancedDebug({
+    getAdvancedDebug('redis-oplog')({
       log: 'subscribers',
       docId: data?.d?._id,
       channel,
@@ -166,7 +166,7 @@ class RedisSubscriptionManager {
       // if by any chance it was deleted after it got dispatched
       // doc will be undefined
       if (!doc) {
-        advancedDebug({ log: 'doc not found ', docId: data?.d?._id, channel });
+        getAdvancedDebug('redis-oplog')({ log: 'doc not found ', docId: data?.d?._id, channel });
         return;
       }
 
@@ -186,7 +186,7 @@ class RedisSubscriptionManager {
     } else {
       subscribers.forEach((redisSubscriber) => {
         try {
-          advancedDebug({
+          getAdvancedDebug('redis-oplog')({
             log: 'processSynthetic',
             docId: data?.d?._id,
             channel,
@@ -216,7 +216,7 @@ class RedisSubscriptionManager {
     const event = data[RedisPipe.EVENT];
     let doc = data[RedisPipe.DOC];
 
-    advancedDebug({ log: 'getDoc.start', doc, docId: doc._id });
+    getAdvancedDebug('redis-oplog')({ log: 'getDoc.start', doc, docId: doc._id });
 
     if (
       collection._redisOplog &&
@@ -224,7 +224,7 @@ class RedisSubscriptionManager {
     ) {
       // If there's no protection against race conditions
       // It means we have received the full doc in doc
-      advancedDebug({
+      getAdvancedDebug('redis-oplog')({
         log: 'getDoc, no protection against race conditions',
         doc,
         docId: doc._id,
@@ -234,7 +234,7 @@ class RedisSubscriptionManager {
 
     const fieldsOfInterest = getFieldsOfInterestFromAll(subscribers);
 
-    advancedDebug({
+    getAdvancedDebug('redis-oplog')({
       log: 'fieldsOfInterest',
       doc,
       docId: doc._id,

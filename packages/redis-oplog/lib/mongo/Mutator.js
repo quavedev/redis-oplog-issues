@@ -9,7 +9,7 @@ import {
 } from './lib/dispatchers';
 import Config from '../config';
 import { Events } from '../constants';
-import { advancedDebug } from '../debug';
+import { getAdvancedDebug } from 'meteor/advanced-debug';
 
 function runCallbackInBackground(fn) {
   Meteor.defer(Meteor.bindEnvironment(fn));
@@ -103,7 +103,7 @@ export default class Mutator {
    * @returns {*}
    */
   static update(Originals, selector, modifier, _config, callback) {
-    advancedDebug({
+    getAdvancedDebug('redis-oplog')({
       log: 'Redis mutator update',
       collectionName: this._name,
       selectorId: selector?._id,

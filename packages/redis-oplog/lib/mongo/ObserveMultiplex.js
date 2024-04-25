@@ -5,6 +5,7 @@ import { Meteor } from 'meteor/meteor';
 import { _ } from 'meteor/underscore';
 import { LocalCollection } from 'meteor/minimongo';
 import OptimisticInvocation from './OptimisticInvocation';
+import { getAdvancedDebug } from 'meteor/advanced-debug';
 
 const Future = Npm.require('fibers/future');
 
@@ -201,7 +202,25 @@ Object.assign(ObserveMultiplexer.prototype, {
       ) {
         throw new Error('Got ' + callbackName + ' during initial adds');
       }
-
+      const namedObject = {
+        args,
+        docId: args?.[0],
+        changed: args?.[1],
+        state: args?.[1]?.state,
+      };
+      if (callbackName === 'changed') {
+        const mappedHandles = Object.entries(self._handles).reduce(
+          (acc, [key, value]) => {
+            return { ...acc, [key]: value?.observeKey };
+          },
+          {}
+        );
+        getAdvancedDebug('redis-oplog')({
+          log: '[ObserveMultiplex][_applyCallback] changed upperlevel',
+          ...namedObject,
+          mappedHandles,
+        });
+      }
       // Now multiplex the callbacks out to all observe handles. It's OK if
       // these calls yield; since we're inside a task, no other use of our queue
       // can continue until these are done. (But we do have to be careful to not
@@ -209,7 +228,18 @@ Object.assign(ObserveMultiplexer.prototype, {
       // queue; thus, we iterate over an array of keys that we control.)
       Object.keys(self._handles).forEach(function (handleId) {
         var handle = self._handles && self._handles[handleId];
-        if (!handle) return;
+        if (!handle) {
+          if (callbackName === 'changed') {
+            getAdvancedDebug('redis-oplog')({
+              log: '[ObserveMultiplex][_applyCallback] handle not found!!',
+              ...namedObject,
+              handleId,
+              observeKey: mappedHandles[handleId],
+            });
+          }
+
+          return;
+        }
         var callback = handle['_' + callbackName];
         // clone arguments so that callbacks can mutate their arguments
 
@@ -224,6 +254,13 @@ Object.assign(ObserveMultiplexer.prototype, {
             }
           }
         } else {
+          if (callbackName === 'changed') {
+            getAdvancedDebug('redis-oplog')({
+              log: '[ObserveMultiplex][_applyCallback] changed inside foreach',
+              ...namedObject,
+              handleId,
+            });
+          }
           callback && callback.apply(null, EJSON.clone(args));
         }
       });
@@ -254,7 +291,7 @@ Object.assign(ObserveMultiplexer.prototype, {
 });
 
 var nextObserveHandleId = 1;
-export function ObserveHandle(multiplexer, callbacks) {
+export function ObserveHandle(multiplexer, callbacks, observeKey) {
   var self = this;
   // The end user is only supposed to call stop().  The other fields are
   // accessible to the multiplexer, though.
@@ -274,6 +311,7 @@ export function ObserveHandle(multiplexer, callbacks) {
   });
   self._stopped = false;
   self._id = nextObserveHandleId++;
+  self.observeKey = observeKey;
 }
 
 ObserveHandle.prototype.stop = function () {

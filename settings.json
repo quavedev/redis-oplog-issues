@@ -1,15 +1,23 @@
 {
   "redisOplog": {
-    "debug": true,
     "debugOptions": {
-      "prefix":"reactivityTracker:",
-      "verboseAdvancedDebug": false,
-      "allFieldsMustMatch": true,
-      "matchEmptyData": false,
+      "allFieldsMustMatch": false,
       "debugFieldsToFilter": {
-        "collectionName": "links",
-        "docId": "JgYhTbnwQ85Xs8Dgr"
-      }
-    }
+        "selector": "cam_7TKxN7ajqJtp45SaE",
+        "docId": "cam_7TKxN7ajqJtp45SaE",
+        "id": "BnDs77KP8v2nF8Kx3",
+        "logKey": "always-log"
+      },
+      "enabled": true,
+      "matchEmptyData": false,
+      "prefix": "reactivityTracker:",
+      "verboseAdvancedDebug": false
+    },
+    "retryIntervalMs": 1000,
+    "mutationDefaults": {
+      "optimistic": true,
+      "pushToRedis": true
+    },
+    "debug": false
   }
 }

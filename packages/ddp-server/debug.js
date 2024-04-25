@@ -9,10 +9,8 @@ const getRedisOplogConfigJsonOrNull = () => {
   return null;
 };
 
-const redisOplogConfig = getRedisOplogConfigJsonOrNull();
-
-const logMessage = (...args) => console.debug(...args);
-const logError = (...args) => console.error(...args);
+const logMessage = (...args) => log(...args);
+const logError = (...args) => log(...args);
 const currentPackage = 'ddp-server';
 
 /**
@@ -28,7 +26,7 @@ const currentPackage = 'ddp-server';
  * @param data expects an object with possible fields: channel, message, doc
  */
 export const advancedDebug = ({ log, trace = false, error, ...data }) => {
-  if (!redisOplogConfig?.debug) {
+  if (!getRedisOplogConfigJsonOrNull()?.debugOptions?.enabled) {
     return;
   }
 
@@ -58,7 +56,7 @@ export const advancedDebug = ({ log, trace = false, error, ...data }) => {
     allFieldsMustMatch = true,
     verboseAdvancedDebug,
     matchEmptyData = false,
-  } = redisOplogConfig.debugOptions || {};
+  } = getRedisOplogConfigJsonOrNull()?.debugOptions || {};
 
   const logPrefix = `${prefix} [${currentPackage}] ${log}`;
   const dataAsString = `${JSON.stringify(preparedData, null, 2)}`;
@@ -83,7 +81,7 @@ export const advancedDebug = ({ log, trace = false, error, ...data }) => {
       !Object.entries(debugFieldsToFilter).some(match)
     ) {
       if (verboseAdvancedDebug) {
-        logMessage(`${logPrefix} not a single match, data: ${dataAsString}`);
+        logMessage(`${logPrefix}[VERBOSE] not a single match, data: ${dataAsString}`);
       }
       return;
     }
@@ -94,7 +92,7 @@ export const advancedDebug = ({ log, trace = false, error, ...data }) => {
       !Object.entries(debugFieldsToFilter).every(match)
     ) {
       if (verboseAdvancedDebug) {
-        logMessage(`${logPrefix} not all match, data: ${dataAsString}`);
+        logMessage(`${logPrefix}[VERBOSE] not all match, data: ${dataAsString}`);
       }
       return;
     }

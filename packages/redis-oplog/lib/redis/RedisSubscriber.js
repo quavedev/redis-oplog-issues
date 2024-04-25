@@ -5,7 +5,7 @@ import extractIdsFromSelector from '../utils/extractIdsFromSelector';
 import RedisSubscriptionManager from './RedisSubscriptionManager';
 import syntheticProcessor from '../processors/synthetic';
 import getDedicatedChannel from '../utils/getDedicatedChannel';
-import { advancedDebug } from '../debug';
+import { getAdvancedDebug } from 'meteor/advanced-debug';
 
 export default class RedisSubscriber {
   /**
@@ -19,7 +19,23 @@ export default class RedisSubscriber {
 
     // We do this because we override the behavior of dedicated "_id" channels
     this.channels = this.getChannels(this.observableCollection.channels);
+    if (
+      this?.observableCollection?.cursorDescription?.selector?.teamId ===
+      'tea_b834id4r7skME8mfW'
+    ) {
+      var getStackTrace = function () {
+        var obj = {};
+        Error.captureStackTrace(obj, getStackTrace);
+        return obj.stack;
+      };
 
+      log('constructor redis subscriber', {
+        oldChannels: this.observableCollection.channels,
+        newChannels: this.channels,
+        strategy: this.strategy,
+        trace: getStackTrace(),
+      });
+    }
     RedisSubscriptionManager.attach(this);
   }
 
@@ -73,7 +89,7 @@ export default class RedisSubscriber {
     try {
       RedisSubscriptionManager.detach(this);
     } catch (e) {
-      advancedDebug({
+      getAdvancedDebug('redis-oplog')({
         log: `[RedisSubscriber] Weird! There was an error while stopping the publication: `,
         error: e,
       });

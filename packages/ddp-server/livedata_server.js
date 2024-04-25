@@ -1,4 +1,4 @@
-import { advancedDebug } from './debug';
+import { getAdvancedDebug } from 'meteor/advanced-debug';
 
 DDPServer = {};
 
@@ -375,9 +375,9 @@ var Session = function (server, version, socket, options) {
     httpHeaders: self.socket.headers,
   };
 
-  advancedDebug({ log: 'before connected', sessionId: self.id });
+  getAdvancedDebug('ddp-server')({ log: 'before connected', sessionId: self.id });
   self.send({ msg: 'connected', session: self.id });
-  advancedDebug({ log: 'after connected', sessionId: self.id });
+  getAdvancedDebug('ddp-server')({ log: 'after connected', sessionId: self.id });
 
   // On initial connect, spin up all the universal publishers.
   Fiber(function () {
@@ -424,7 +424,7 @@ Object.assign(Session.prototype, {
   },
 
   sendAdded(collectionName, id, fields) {
-    advancedDebug({
+    getAdvancedDebug('ddp-server')({
       log: 'sendAdded begins',
       collectionName,
       docId: id,
@@ -432,7 +432,7 @@ Object.assign(Session.prototype, {
       fields,
     });
     if (this._canSend(collectionName)) {
-      advancedDebug({
+      getAdvancedDebug('ddp-server')({
         log: 'sendAdded send',
         collectionName,
         docId: id,
@@ -444,7 +444,7 @@ Object.assign(Session.prototype, {
   },
 
   sendChanged(collectionName, id, fields) {
-    advancedDebug({
+    getAdvancedDebug('ddp-server')({
       log: 'sendChanged begins',
       collectionName,
       docId: id,
@@ -453,7 +453,7 @@ Object.assign(Session.prototype, {
     });
     if (_.isEmpty(fields)) return;
 
-    advancedDebug({
+    getAdvancedDebug('ddp-server')({
       log: 'sendChanged not empty',
       collectionName,
       docId: id,
@@ -461,7 +461,7 @@ Object.assign(Session.prototype, {
       fields,
     });
     if (this._canSend(collectionName)) {
-      advancedDebug({
+      getAdvancedDebug('ddp-server')({
         log: 'sendChanged send',
         collectionName,
         docId: id,
@@ -478,9 +478,9 @@ Object.assign(Session.prototype, {
   },
 
   sendRemoved(collectionName, id) {
-    advancedDebug({ log: 'sendRemoved begins', collectionName, docId: id, id });
+    getAdvancedDebug('ddp-server')({ log: 'sendRemoved begins', collectionName, docId: id, id });
     if (this._canSend(collectionName)) {
-      advancedDebug({ log: 'sendRemoved send', collectionName, docId: id, id });
+      getAdvancedDebug('ddp-server')({ log: 'sendRemoved send', collectionName, docId: id, id });
       this.send({ msg: 'removed', collection: collectionName, id });
     }
   },

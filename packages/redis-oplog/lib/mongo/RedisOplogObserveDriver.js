@@ -6,7 +6,7 @@ import getStrategy from '../processors/getStrategy';
 import { Strategy } from '../constants';
 import RedisSubscriber from '../redis/RedisSubscriber';
 import ObservableCollection from '../cache/ObservableCollection';
-import { advancedDebug } from '../debug';
+import { getAdvancedDebug } from 'meteor/advanced-debug';
 
 let currentId = 0;
 export default class RedisOplogObserveDriver {
@@ -94,7 +94,7 @@ export default class RedisOplogObserveDriver {
       try {
         LocalCollection._checkSupportedProjection(fields);
       } catch (e) {
-        advancedDebug({ log: 'cursorSupported error', error: e });
+        getAdvancedDebug('redis-oplog')({ log: 'cursorSupported error', error: e });
         if (e.name === 'MinimongoError') {
           return false;
         } else {

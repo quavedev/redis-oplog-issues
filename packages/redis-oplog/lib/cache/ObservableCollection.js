@@ -8,7 +8,7 @@ import { MongoIDMap } from './mongoIdMap';
 import { EJSON } from 'meteor/ejson';
 import isRemovedNonExistent from '../utils/isRemovedNonExistent';
 import getStrategy from '../processors/getStrategy';
-import { advancedDebug } from '../debug';
+import { getAdvancedDebug } from 'meteor/advanced-debug';
 
 const allowedOptions = [
   'limit',
@@ -125,6 +125,13 @@ export default class ObservableCollection {
     this._sharedProjectionFn = LocalCollection._compileProjection(
       this._sharedProjection
     );
+    if (this?.cursorDescription?.selector?.teamId === 'tea_b834id4r7skME8mfW') {
+      log('observableCollection debug:', {
+        options: this.options,
+        collectionName: this.collectionName,
+        cCollectionName: cursorDescription.collectionName,
+      });
+    }
   }
 
   /**
@@ -135,7 +142,7 @@ export default class ObservableCollection {
    */
   isEligible(doc) {
     if (this.matcher) {
-      advancedDebug({
+      getAdvancedDebug('redis-oplog')({
         log: 'isEligible',
         doc,
         docId: doc?._id,
@@ -201,7 +208,7 @@ export default class ObservableCollection {
         doc = this.projectFieldsOnDoc(doc);
       }
     }
-    advancedDebug({ log: 'store add', doc, docId: doc?._id });
+    getAdvancedDebug('redis-oplog')({ log: 'store add', doc, docId: doc?._id });
     this.store.set(doc._id, doc);
     this.multiplexer.added(doc._id, doc);
   }
@@ -214,7 +221,7 @@ export default class ObservableCollection {
     const { limit, skip, ...cleanedOptions } = this.options;
     const doc = this.collection.findOne({ _id: docId }, cleanedOptions);
 
-    advancedDebug({ log: 'store store addById', doc, docId: doc?._id });
+    getAdvancedDebug('redis-oplog')({ log: 'store store addById', doc, docId: doc?._id });
     this.store.set(docId, doc);
 
     if (doc) {
@@ -230,7 +237,7 @@ export default class ObservableCollection {
    */
   change(doc, modifiedFields) {
     const docId = doc._id;
-    advancedDebug({
+    getAdvancedDebug('redis-oplog')({
       log: 'ObservableCollection change',
       doc,
       docId: doc?._id,
@@ -238,7 +245,7 @@ export default class ObservableCollection {
     });
     const oldDoc = this.store.get(docId);
     if (oldDoc == null) {
-      advancedDebug({
+      getAdvancedDebug('redis-oplog')({
         log: 'ObservableCollection change, no oldDoc',
         doc,
         docId: doc?._id,
@@ -253,7 +260,7 @@ export default class ObservableCollection {
     var projectedOld = this._projectionFn(oldDoc);
 
     var changed = DiffSequence.makeChangedFields(projectedNew, projectedOld);
-    advancedDebug({
+    getAdvancedDebug('redis-oplog')({
       log: 'ObservableCollection changed values',
       doc,
       docId: doc?._id,

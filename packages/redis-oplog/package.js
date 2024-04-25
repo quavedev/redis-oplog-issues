@@ -1,5 +1,5 @@
 Package.describe({
-  name: 'cultofcoders:redis-oplog',
+  name: 'lempire:redis-oplog',
   version: '2.2.1',
   // Brief, one-line summary of the package.
   summary: "Replacement for Meteor's MongoDB oplog implementation",
@@ -18,6 +18,7 @@ Npm.depends({
 
 Package.onUse((api) => {
   api.versionsFrom(['1.12.2', '2.8.1', '2.12']);
+  api.use('advanced-debug');
   api.use([
     'underscore',
     'ecmascript',

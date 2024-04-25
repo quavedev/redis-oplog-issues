@@ -4,14 +4,14 @@ import { _ } from 'meteor/underscore';
 import RedisOplogObserveDriver from './RedisOplogObserveDriver';
 import { ObserveMultiplexer, ObserveHandle } from './ObserveMultiplex';
 import PollingObserveDriver from './PollingObserveDriver';
-import { advancedDebug } from '../debug';
+import { getAdvancedDebug } from 'meteor/advanced-debug';
 
 export default function (cursorDescription, ordered, callbacks) {
-  advancedDebug({ log: 'add observeChanges', cursorDescription });
+  getAdvancedDebug('redis-oplog')({ log: 'add observeChanges', cursorDescription });
   try {
     const self = this;
     if (cursorDescription.options.tailable) {
-      advancedDebug({ log: 'add observeChanges tailable', cursorDescription });
+      getAdvancedDebug('redis-oplog')({ log: 'add observeChanges tailable', cursorDescription });
       return self._observeChangesTailable(
         cursorDescription,
         ordered,
@@ -38,10 +38,11 @@ export default function (cursorDescription, ordered, callbacks) {
       )
     );
 
-    advancedDebug({
+    getAdvancedDebug('redis-oplog')({
       log: 'add observeChanges observeKey',
       cursorDescription,
       observeKey,
+      keys: Object.keys(self._observeMultiplexers),
     });
     var multiplexer, observeDriver;
     var firstHandle = false; // Find a matching ObserveMultiplexer, or create a new one. This next block is
@@ -57,6 +58,11 @@ export default function (cursorDescription, ordered, callbacks) {
         multiplexer = new ObserveMultiplexer({
           ordered: ordered,
           onStop: function () {
+            getAdvancedDebug('redis-oplog')({
+              log: 'multiplexer stopped',
+              observeKey,
+              logKey: 'always-log',
+            });
             delete self._observeMultiplexers[observeKey];
             observeDriver.stop();
           },
@@ -65,9 +71,9 @@ export default function (cursorDescription, ordered, callbacks) {
       }
     });
 
-    var observeHandle = new ObserveHandle(multiplexer, callbacks);
+    var observeHandle = new ObserveHandle(multiplexer, callbacks, observeKey);
 
-    advancedDebug({
+    getAdvancedDebug('redis-oplog')({
       log: 'add observeChanges firstHandle',
       cursorDescription,
       firstHandle,
@@ -91,7 +97,7 @@ export default function (cursorDescription, ordered, callbacks) {
               matcher = new Minimongo.Matcher(cursorDescription.selector);
               return true;
             } catch (e) {
-              advancedDebug({
+              getAdvancedDebug('redis-oplog')({
                 log: 'canUseOplog error on matcher',
                 cursorDescription,
               });
@@ -120,7 +126,7 @@ export default function (cursorDescription, ordered, callbacks) {
             } catch (e) {
               // XXX make all compilation errors MinimongoError or something
               //     so that this doesn't ignore unrelated exceptions
-              advancedDebug({
+              getAdvancedDebug('redis-oplog')({
                 log: 'canUseOplog error on matcher with sorter',
                 cursorDescription,
               });
@@ -132,7 +138,7 @@ export default function (cursorDescription, ordered, callbacks) {
           return f();
         }
       ); // invoke each function
-      advancedDebug({ log: 'add observeChanges canUseOplog', canUseOplog });
+      getAdvancedDebug('redis-oplog')({ log: 'add observeChanges canUseOplog', canUseOplog });
 
       var driverClass = canUseOplog
         ? RedisOplogObserveDriver
@@ -150,21 +156,26 @@ export default function (cursorDescription, ordered, callbacks) {
         _testOnlyPollCallback: callbacks._testOnlyPollCallback,
       }); // This field is only set for use in tests.
 
+      getAdvancedDebug('redis-oplog')({
+        log: 'multiplexer started',
+        observeKey,
+        logKey: 'always-log',
+      });
       multiplexer._observeDriver = observeDriver;
     }
 
     // Blocks until the initial adds have been sent.
-    advancedDebug({
+    getAdvancedDebug('redis-oplog')({
       log: 'add observeChanges before addHandleAndSendInitialAdds',
     });
     multiplexer.addHandleAndSendInitialAdds(observeHandle);
-    advancedDebug({
+    getAdvancedDebug('redis-oplog')({
       log: 'add observeChanges after addHandleAndSendInitialAdds',
     });
 
     return observeHandle;
   } catch (e) {
-    advancedDebug({
+    getAdvancedDebug('redis-oplog')({
       log: 'error in observeChanges',
       cursorDescription,
       error: e,
