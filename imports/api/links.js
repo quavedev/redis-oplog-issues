@@ -1,16 +1,20 @@
-import { Meteor } from "meteor/meteor";
-import { Mongo } from "meteor/mongo";
-import { Random } from "meteor/random";
+import { Meteor } from 'meteor/meteor';
+import { Mongo } from 'meteor/mongo';
+import { Random } from 'meteor/random';
 
-export const LinksCollection = new Mongo.Collection("links");
+export const LinksCollection = new Mongo.Collection('links');
 
 export async function insertLink(link) {
-  await LinksCollection.insertAsync({ ...link, updatedAt: new Date(), createdAt: new Date() });
+  await LinksCollection.insertAsync({
+    ...link,
+    updatedAt: new Date(),
+    createdAt: new Date(),
+  });
 }
 Meteor.methods({
   addLink: async function ({
     title = `Discussions ${Random.id()}`,
-    url = "https://forums.meteor.com",
+    url = 'https://forums.meteor.com',
     enabled = false,
   } = {}) {
     await insertLink({
@@ -27,17 +31,17 @@ Meteor.methods({
   toggleLinkByTitle: async function ({ title, enabled } = {}) {
     await LinksCollection.updateAsync(
       { title },
-      { $set: { updatedAt: new Date(), enabled } },
+      { $set: { updatedAt: new Date(), enabled } }
     );
   },
   deleteLinkByTitle: async function ({ title } = {}) {
     await LinksCollection.removeAsync({ title });
   },
-  toggleAllLinks: async function ({  enabled } = {}) {
+  toggleAllLinks: async function ({ enabled } = {}) {
     await LinksCollection.updateAsync(
       {},
       { $set: { updatedAt: new Date(), enabled } },
-      { multi: true },
+      { multi: true }
     );
   },
 });

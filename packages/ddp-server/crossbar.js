@@ -12,7 +12,7 @@ DDPServer._Crossbar = function (options) {
   // collection".
   self.listenersByCollection = {};
   self.listenersByCollectionCount = {};
-  self.factPackage = options.factPackage || "livedata";
+  self.factPackage = options.factPackage || 'livedata';
   self.factName = options.factName || null;
 };
 
@@ -20,14 +20,13 @@ _.extend(DDPServer._Crossbar.prototype, {
   // msg is a trigger or a notification
   _collectionForMessage: function (msg) {
     var self = this;
-    if (! _.has(msg, 'collection')) {
+    if (!_.has(msg, 'collection')) {
       return '';
-    } else if (typeof(msg.collection) === 'string') {
-      if (msg.collection === '')
-        throw Error("Message has empty collection!");
+    } else if (typeof msg.collection === 'string') {
+      if (msg.collection === '') throw Error('Message has empty collection!');
       return msg.collection;
     } else {
-      throw Error("Message has non-string collection!");
+      throw Error('Message has non-string collection!');
     }
   },
 
@@ -46,8 +45,8 @@ _.extend(DDPServer._Crossbar.prototype, {
     var id = self.nextId++;
 
     var collection = self._collectionForMessage(trigger);
-    var record = {trigger: EJSON.clone(trigger), callback: callback};
-    if (! _.has(self.listenersByCollection, collection)) {
+    var record = { trigger: EJSON.clone(trigger), callback: callback };
+    if (!_.has(self.listenersByCollection, collection)) {
       self.listenersByCollection[collection] = {};
       self.listenersByCollectionCount[collection] = 0;
     }
@@ -56,14 +55,20 @@ _.extend(DDPServer._Crossbar.prototype, {
 
     if (self.factName && Package['facts-base']) {
       Package['facts-base'].Facts.incrementServerFact(
-        self.factPackage, self.factName, 1);
+        self.factPackage,
+        self.factName,
+        1
+      );
     }
 
     return {
       stop: function () {
         if (self.factName && Package['facts-base']) {
           Package['facts-base'].Facts.incrementServerFact(
-            self.factPackage, self.factName, -1);
+            self.factPackage,
+            self.factName,
+            -1
+          );
         }
         delete self.listenersByCollection[collection][id];
         self.listenersByCollectionCount[collection]--;
@@ -71,7 +76,7 @@ _.extend(DDPServer._Crossbar.prototype, {
           delete self.listenersByCollection[collection];
           delete self.listenersByCollectionCount[collection];
         }
-      }
+      },
     };
   },
 
@@ -88,7 +93,7 @@ _.extend(DDPServer._Crossbar.prototype, {
 
     var collection = self._collectionForMessage(notification);
 
-    if (! _.has(self.listenersByCollection, collection)) {
+    if (!_.has(self.listenersByCollection, collection)) {
       return;
     }
 
@@ -139,22 +144,28 @@ _.extend(DDPServer._Crossbar.prototype, {
     // triggers by collection, but let's fast-track "nope, different ID" (and
     // avoid the overly generic EJSON.equals). This makes a noticeable
     // performance difference; see https://github.com/meteor/meteor/pull/3697
-    if (typeof(notification.id) === 'string' &&
-        typeof(trigger.id) === 'string' &&
-        notification.id !== trigger.id) {
+    if (
+      typeof notification.id === 'string' &&
+      typeof trigger.id === 'string' &&
+      notification.id !== trigger.id
+    ) {
       return false;
     }
-    if (notification.id instanceof MongoID.ObjectID &&
-        trigger.id instanceof MongoID.ObjectID &&
-        ! notification.id.equals(trigger.id)) {
+    if (
+      notification.id instanceof MongoID.ObjectID &&
+      trigger.id instanceof MongoID.ObjectID &&
+      !notification.id.equals(trigger.id)
+    ) {
       return false;
     }
 
     return _.all(trigger, function (triggerValue, key) {
-      return !_.has(notification, key) ||
-        EJSON.equals(triggerValue, notification[key]);
+      return (
+        !_.has(notification, key) ||
+        EJSON.equals(triggerValue, notification[key])
+      );
     });
-  }
+  },
 });
 
 // The "invalidation crossbar" is a specific instance used by the DDP server to
@@ -163,5 +174,5 @@ _.extend(DDPServer._Crossbar.prototype, {
 // want to delay the write fence from firing (ie, the DDP method-data-updated
 // message from being sent).
 DDPServer._InvalidationCrossbar = new DDPServer._Crossbar({
-  factName: "invalidation-crossbar-listeners"
+  factName: 'invalidation-crossbar-listeners',
 });

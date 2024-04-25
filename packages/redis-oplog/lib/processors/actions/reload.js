@@ -8,23 +8,23 @@ import { MongoIDMap } from '../../cache/mongoIdMap';
  * @param observableCollection
  */
 export default function (observableCollection) {
-    const { store, cursor } = observableCollection;
+  const { store, cursor } = observableCollection;
 
-    const freshData = cursor.fetch();
+  const freshData = cursor.fetch();
 
-    const newStore = new MongoIDMap();
-    freshData.forEach((doc) => newStore.set(doc._id, doc));
+  const newStore = new MongoIDMap();
+  freshData.forEach((doc) => newStore.set(doc._id, doc));
 
-    store.compareWith(newStore, {
-        both(docId, oldDoc, newDoc) {
-            const modifiedFields = _.union(Object.keys(oldDoc), Object.keys(newDoc));
-            observableCollection.change(newDoc, modifiedFields);
-        },
-        leftOnly(docId) {
-            observableCollection.remove(docId);
-        },
-        rightOnly(docId, newDoc) {
-            observableCollection.add(newDoc);
-        },
-    });
+  store.compareWith(newStore, {
+    both(docId, oldDoc, newDoc) {
+      const modifiedFields = _.union(Object.keys(oldDoc), Object.keys(newDoc));
+      observableCollection.change(newDoc, modifiedFields);
+    },
+    leftOnly(docId) {
+      observableCollection.remove(docId);
+    },
+    rightOnly(docId, newDoc) {
+      observableCollection.add(newDoc);
+    },
+  });
 }

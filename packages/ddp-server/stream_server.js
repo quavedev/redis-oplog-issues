@@ -13,17 +13,18 @@ var websocketExtensions = _.once(function () {
   var extensions = [];
 
   var websocketCompressionConfig = process.env.SERVER_WEBSOCKET_COMPRESSION
-        ? JSON.parse(process.env.SERVER_WEBSOCKET_COMPRESSION) : {};
+    ? JSON.parse(process.env.SERVER_WEBSOCKET_COMPRESSION)
+    : {};
   if (websocketCompressionConfig) {
-    extensions.push(Npm.require('permessage-deflate').configure(
-      websocketCompressionConfig
-    ));
+    extensions.push(
+      Npm.require('permessage-deflate').configure(websocketCompressionConfig)
+    );
   }
 
   return extensions;
 });
 
-var pathPrefix = __meteor_runtime_config__.ROOT_URL_PATH_PREFIX ||  "";
+var pathPrefix = __meteor_runtime_config__.ROOT_URL_PATH_PREFIX || '';
 
 StreamServer = function () {
   var self = this;
@@ -39,7 +40,7 @@ StreamServer = function () {
   var sockjs = Npm.require('sockjs');
   var serverOptions = {
     prefix: self.prefix,
-    log: function() {},
+    log: function () {},
     // this is the default, but we code it explicitly because we depend
     // on it in stream_client:HEARTBEAT_TIMEOUT
     heartbeat_delay: 45000,
@@ -56,7 +57,7 @@ StreamServer = function () {
     // Set the USE_JSESSIONID environment variable to enable setting the
     // JSESSIONID cookie. This is useful for setting up proxies with
     // session affinity.
-    jsessionid: !!process.env.USE_JSESSIONID
+    jsessionid: !!process.env.USE_JSESSIONID,
   };
 
   // If you know your server environment (eg, proxies) will prevent websockets
@@ -67,7 +68,7 @@ StreamServer = function () {
     serverOptions.websocket = false;
   } else {
     serverOptions.faye_server_options = {
-      extensions: websocketExtensions()
+      extensions: websocketExtensions(),
     };
   }
 
@@ -78,10 +79,14 @@ StreamServer = function () {
   // request.  This compensates for the fact that sockjs removes all listeners
   // for "request" to add its own.
   WebApp.httpServer.removeListener(
-    'request', WebApp._timeoutAdjustmentRequestCallback);
+    'request',
+    WebApp._timeoutAdjustmentRequestCallback
+  );
   self.server.installHandlers(WebApp.httpServer);
   WebApp.httpServer.addListener(
-    'request', WebApp._timeoutAdjustmentRequestCallback);
+    'request',
+    WebApp._timeoutAdjustmentRequestCallback
+  );
 
   // Support the /websocket endpoint
   self._redirectWebsocketEndpoint();
@@ -104,9 +109,11 @@ StreamServer = function () {
     // and setting it back to zero when we set up the heartbeat in
     // livedata_server.js.
     socket.setWebsocketTimeout = function (timeout) {
-      if ((socket.protocol === 'websocket' ||
-           socket.protocol === 'websocket-raw')
-          && socket._session.recv) {
+      if (
+        (socket.protocol === 'websocket' ||
+          socket.protocol === 'websocket-raw') &&
+        socket._session.recv
+      ) {
         socket._session.recv.connection.setTimeout(timeout);
       }
     };
@@ -122,7 +129,7 @@ StreamServer = function () {
 
     // only to send a message after connection on tests, useful for
     // socket-stream-client/server-tests.js
-    if (process.env.TEST_METADATA && process.env.TEST_METADATA !== "{}") {
+    if (process.env.TEST_METADATA && process.env.TEST_METADATA !== '{}') {
       socket.send(JSON.stringify({ testMessageOnConnect: true }));
     }
 
@@ -132,7 +139,6 @@ StreamServer = function () {
       callback(socket);
     });
   });
-
 };
 
 Object.assign(StreamServer.prototype, {
@@ -154,7 +160,7 @@ Object.assign(StreamServer.prototype, {
 
   // Redirect /websocket to /sockjs/websocket in order to not expose
   // sockjs to clients that want to use raw websockets
-  _redirectWebsocketEndpoint: function() {
+  _redirectWebsocketEndpoint: function () {
     var self = this;
     // Unfortunately we can't use a connect middleware here since
     // sockjs installs itself prior to all existing listeners
@@ -168,7 +174,7 @@ Object.assign(StreamServer.prototype, {
 
       // request and upgrade have different arguments passed but
       // we only care about the first one which is always request
-      var newListener = function(request /*, moreArguments */) {
+      var newListener = function (request /*, moreArguments */) {
         // Store arguments for use within the closure below
         var args = arguments;
 
@@ -178,16 +184,18 @@ Object.assign(StreamServer.prototype, {
         // Rewrite /websocket and /websocket/ urls to /sockjs/websocket while
         // preserving query string.
         var parsedUrl = url.parse(request.url);
-        if (parsedUrl.pathname === pathPrefix + '/websocket' ||
-            parsedUrl.pathname === pathPrefix + '/websocket/') {
+        if (
+          parsedUrl.pathname === pathPrefix + '/websocket' ||
+          parsedUrl.pathname === pathPrefix + '/websocket/'
+        ) {
           parsedUrl.pathname = self.prefix + '/websocket';
           request.url = url.format(parsedUrl);
         }
-        _.each(oldHttpServerListeners, function(oldListener) {
+        _.each(oldHttpServerListeners, function (oldListener) {
           oldListener.apply(httpServer, args);
         });
       };
       httpServer.addListener(event, newListener);
     });
-  }
+  },
 });

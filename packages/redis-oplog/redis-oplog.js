@@ -10,39 +10,39 @@ import ObservableCollection from './lib/cache/ObservableCollection';
 import Vent from './lib/vent/Vent';
 
 const RedisOplog = {
-    init,
+  init,
 };
 
 // Warnings
-Meteor.startup(function() {
-    if (Package['insecure']) {
-        console.log('RedisOplog does not support the insecure package.');
-    }
+Meteor.startup(function () {
+  if (Package['insecure']) {
+    console.log('RedisOplog does not support the insecure package.');
+  }
 });
 
 export {
-    RedisOplog,
-    SyntheticMutator,
-    ObservableCollection,
-    RedisPipe,
-    Config,
-    Events,
-    Vent,
-    getRedisListener,
-    getRedisPusher,
+  RedisOplog,
+  SyntheticMutator,
+  ObservableCollection,
+  RedisPipe,
+  Config,
+  Events,
+  Vent,
+  getRedisListener,
+  getRedisPusher,
 };
 
 const getRedisOplogConfigJsonOrNull = () => {
-    if (process.env.REDIS_OPLOG_SETTINGS) {
-        return JSON.parse(process.env.REDIS_OPLOG_SETTINGS);
-    } else if (Meteor.settings.redisOplog) {
-        return Meteor.settings.redisOplog;
-    }
-    return null;
-}
+  if (process.env.REDIS_OPLOG_SETTINGS) {
+    return JSON.parse(process.env.REDIS_OPLOG_SETTINGS);
+  } else if (Meteor.settings.redisOplog) {
+    return Meteor.settings.redisOplog;
+  }
+  return null;
+};
 
 const redisOplogConfig = getRedisOplogConfigJsonOrNull();
 
 if (redisOplogConfig) {
-    init(redisOplogConfig);
+  init(redisOplogConfig);
 }

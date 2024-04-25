@@ -1,4 +1,4 @@
-import { Meteor } from "meteor/meteor";
+import { Meteor } from 'meteor/meteor';
 
 const getRedisOplogConfigJsonOrNull = () => {
   if (process.env.REDIS_OPLOG_SETTINGS) {
@@ -53,7 +53,7 @@ export const advancedDebug = ({ log, trace = false, error, ...data }) => {
   };
 
   const {
-    prefix = "",
+    prefix = '',
     debugFieldsToFilter = {},
     allFieldsMustMatch = true,
     verboseAdvancedDebug,
@@ -78,9 +78,9 @@ export const advancedDebug = ({ log, trace = false, error, ...data }) => {
 
   if (debugSpecificFieldValues) {
     if (
-        !emptyDataIsMatch &&
-        !allFieldsMustMatch &&
-        !Object.entries(debugFieldsToFilter).some(match)
+      !emptyDataIsMatch &&
+      !allFieldsMustMatch &&
+      !Object.entries(debugFieldsToFilter).some(match)
     ) {
       if (verboseAdvancedDebug) {
         logMessage(`${logPrefix} not a single match, data: ${dataAsString}`);
@@ -89,9 +89,9 @@ export const advancedDebug = ({ log, trace = false, error, ...data }) => {
     }
 
     if (
-        !emptyDataIsMatch &&
-        allFieldsMustMatch &&
-        !Object.entries(debugFieldsToFilter).every(match)
+      !emptyDataIsMatch &&
+      allFieldsMustMatch &&
+      !Object.entries(debugFieldsToFilter).every(match)
     ) {
       if (verboseAdvancedDebug) {
         logMessage(`${logPrefix} not all match, data: ${dataAsString}`);
@@ -101,12 +101,12 @@ export const advancedDebug = ({ log, trace = false, error, ...data }) => {
   }
 
   const matchedFields = debugSpecificFieldValues
-      ? Object.entries(debugFieldsToFilter)
-          .filter(match)
-          .map(([key, value]) => `${key}: ${value}`)
-      : "";
+    ? Object.entries(debugFieldsToFilter)
+        .filter(match)
+        .map(([key, value]) => `${key}: ${value}`)
+    : '';
   logMessage(
-      `${logPrefix} match={${emptyDataIsMatch ? "empty" : matchedFields}}, data: ${dataAsString}`,
+    `${logPrefix} match={${emptyDataIsMatch ? 'empty' : matchedFields}}, data: ${dataAsString}`
   );
 
   if (trace) {

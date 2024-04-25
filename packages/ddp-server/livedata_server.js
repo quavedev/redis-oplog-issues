@@ -1,4 +1,4 @@
-import {advancedDebug} from "./debug";
+import { advancedDebug } from './debug';
 
 DDPServer = {};
 
@@ -40,8 +40,8 @@ const publicationStrategies = {
   NO_MERGE_MULTI: {
     useDummyDocumentView: true,
     useCollectionView: true,
-    doAccountingForCollection: true
-  }
+    doAccountingForCollection: true,
+  },
 };
 
 DDPServer.publicationStrategies = publicationStrategies;
@@ -62,17 +62,22 @@ var DummyDocumentView = function () {
 
 Object.assign(DummyDocumentView.prototype, {
   getFields: function () {
-    return {}
+    return {};
   },
 
   clearField: function (subscriptionHandle, key, changeCollector) {
-    changeCollector[key] = undefined
+    changeCollector[key] = undefined;
   },
 
-  changeField: function (subscriptionHandle, key, value,
-                         changeCollector, isAdd) {
-    changeCollector[key] = value
-  }
+  changeField: function (
+    subscriptionHandle,
+    key,
+    value,
+    changeCollector,
+    isAdd
+  ) {
+    changeCollector[key] = value;
+  },
 });
 
 // Represents a single document in a SessionCollectionView
@@ -84,9 +89,7 @@ var SessionDocumentView = function () {
 
 DDPServer._SessionDocumentView = SessionDocumentView;
 
-
 _.extend(SessionDocumentView.prototype, {
-
   getFields: function () {
     var self = this;
     var ret = {};
@@ -99,14 +102,12 @@ _.extend(SessionDocumentView.prototype, {
   clearField: function (subscriptionHandle, key, changeCollector) {
     var self = this;
     // Publish API ignores _id if present in fields
-    if (key === "_id")
-      return;
+    if (key === '_id') return;
     var precedenceList = self.dataByKey.get(key);
 
     // It's okay to clear fields that didn't exist. No need to throw
     // an error.
-    if (!precedenceList)
-      return;
+    if (!precedenceList) return;
 
     var removedValue = undefined;
     for (var i = 0; i < precedenceList.length; i++) {
@@ -114,8 +115,7 @@ _.extend(SessionDocumentView.prototype, {
       if (precedence.subscriptionHandle === subscriptionHandle) {
         // The view's value can only change if this subscription is the one that
         // used to have precedence.
-        if (i === 0)
-          removedValue = precedence.value;
+        if (i === 0) removedValue = precedence.value;
         precedenceList.splice(i, 1);
         break;
       }
@@ -123,25 +123,32 @@ _.extend(SessionDocumentView.prototype, {
     if (precedenceList.length === 0) {
       self.dataByKey.delete(key);
       changeCollector[key] = undefined;
-    } else if (removedValue !== undefined &&
-               !EJSON.equals(removedValue, precedenceList[0].value)) {
+    } else if (
+      removedValue !== undefined &&
+      !EJSON.equals(removedValue, precedenceList[0].value)
+    ) {
       changeCollector[key] = precedenceList[0].value;
     }
   },
 
-  changeField: function (subscriptionHandle, key, value,
-                         changeCollector, isAdd) {
+  changeField: function (
+    subscriptionHandle,
+    key,
+    value,
+    changeCollector,
+    isAdd
+  ) {
     var self = this;
     // Publish API ignores _id if present in fields
-    if (key === "_id")
-      return;
+    if (key === '_id') return;
 
     // Don't share state with the data passed in by the user.
     value = EJSON.clone(value);
 
     if (!self.dataByKey.has(key)) {
-      self.dataByKey.set(key, [{subscriptionHandle: subscriptionHandle,
-                                value: value}]);
+      self.dataByKey.set(key, [
+        { subscriptionHandle: subscriptionHandle, value: value },
+      ]);
       changeCollector[key] = value;
       return;
     }
@@ -149,7 +156,7 @@ _.extend(SessionDocumentView.prototype, {
     var elt;
     if (!isAdd) {
       elt = precedenceList.find(function (precedence) {
-          return precedence.subscriptionHandle === subscriptionHandle;
+        return precedence.subscriptionHandle === subscriptionHandle;
       });
     }
 
@@ -161,10 +168,12 @@ _.extend(SessionDocumentView.prototype, {
       elt.value = value;
     } else {
       // this subscription is newly caring about this field
-      precedenceList.push({subscriptionHandle: subscriptionHandle, value: value});
+      precedenceList.push({
+        subscriptionHandle: subscriptionHandle,
+        value: value,
+      });
     }
-
-  }
+  },
 });
 
 /**
@@ -182,9 +191,7 @@ var SessionCollectionView = function (collectionName, sessionCallbacks) {
 
 DDPServer._SessionCollectionView = SessionCollectionView;
 
-
 Object.assign(SessionCollectionView.prototype, {
-
   isEmpty: function () {
     var self = this;
     return self.documents.size === 0;
@@ -201,7 +208,7 @@ Object.assign(SessionCollectionView.prototype, {
 
       leftOnly: function (id, prevDV) {
         self.callbacks.removed(self.collectionName, id);
-      }
+      },
     });
   },
 
@@ -210,15 +217,14 @@ Object.assign(SessionCollectionView.prototype, {
     var fields = {};
     DiffSequence.diffObjects(prevDV.getFields(), nowDV.getFields(), {
       both: function (key, prev, now) {
-        if (!EJSON.equals(prev, now))
-          fields[key] = now;
+        if (!EJSON.equals(prev, now)) fields[key] = now;
       },
       rightOnly: function (key, now) {
         fields[key] = now;
       },
-      leftOnly: function(key, prev) {
+      leftOnly: function (key, prev) {
         fields[key] = undefined;
-      }
+      },
     });
     self.callbacks.changed(self.collectionName, id, fields);
   },
@@ -229,7 +235,10 @@ Object.assign(SessionCollectionView.prototype, {
     var added = false;
     if (!docView) {
       added = true;
-      if (Meteor.server.getPublicationStrategy(this.collectionName).useDummyDocumentView) {
+      if (
+        Meteor.server.getPublicationStrategy(this.collectionName)
+          .useDummyDocumentView
+      ) {
         docView = new DummyDocumentView();
       } else {
         docView = new SessionDocumentView();
@@ -241,12 +250,15 @@ Object.assign(SessionCollectionView.prototype, {
     var changeCollector = {};
     _.each(fields, function (value, key) {
       docView.changeField(
-        subscriptionHandle, key, value, changeCollector, true);
+        subscriptionHandle,
+        key,
+        value,
+        changeCollector,
+        true
+      );
     });
-    if (added)
-      self.callbacks.added(self.collectionName, id, changeCollector);
-    else
-      self.callbacks.changed(self.collectionName, id, changeCollector);
+    if (added) self.callbacks.added(self.collectionName, id, changeCollector);
+    else self.callbacks.changed(self.collectionName, id, changeCollector);
   },
 
   changed: function (subscriptionHandle, id, changed) {
@@ -254,12 +266,11 @@ Object.assign(SessionCollectionView.prototype, {
     var changedResult = {};
     var docView = self.documents.get(id);
     if (!docView)
-      throw new Error("Could not find element with id " + id + " to change");
+      throw new Error('Could not find element with id ' + id + ' to change');
     _.each(changed, function (value, key) {
       if (value === undefined)
         docView.clearField(subscriptionHandle, key, changedResult);
-      else
-        docView.changeField(subscriptionHandle, key, value, changedResult);
+      else docView.changeField(subscriptionHandle, key, value, changedResult);
     });
     self.callbacks.changed(self.collectionName, id, changedResult);
   },
@@ -268,7 +279,7 @@ Object.assign(SessionCollectionView.prototype, {
     var self = this;
     var docView = self.documents.get(id);
     if (!docView) {
-      var err = new Error("Removed nonexistent document " + id);
+      var err = new Error('Removed nonexistent document ' + id);
       throw err;
     }
     docView.existsIn.delete(subscriptionHandle);
@@ -286,7 +297,7 @@ Object.assign(SessionCollectionView.prototype, {
 
       self.callbacks.changed(self.collectionName, id, changed);
     }
-  }
+  },
 });
 
 /******************************************************************************/
@@ -336,7 +347,6 @@ var Session = function (server, version, socket, options) {
   // List of callbacks to call when this connection is closed.
   self._closeCallbacks = [];
 
-
   // XXX HACK: If a sockjs connection, save off the URL. This is
   // temporary and will go away in the near future.
   self._socketUrl = socket.url;
@@ -353,7 +363,7 @@ var Session = function (server, version, socket, options) {
       self.close();
     },
     onClose: function (fn) {
-      var cb = Meteor.bindEnvironment(fn, "connection onClose callback");
+      var cb = Meteor.bindEnvironment(fn, 'connection onClose callback');
       if (self.inQueue) {
         self._closeCallbacks.push(cb);
       } else {
@@ -362,13 +372,12 @@ var Session = function (server, version, socket, options) {
       }
     },
     clientAddress: self._clientAddress(),
-    httpHeaders: self.socket.headers
+    httpHeaders: self.socket.headers,
   };
 
-
-  advancedDebug({log: 'before connected', sessionId: self.id});
+  advancedDebug({ log: 'before connected', sessionId: self.id });
   self.send({ msg: 'connected', session: self.id });
-  advancedDebug({log: 'after connected', sessionId: self.id});
+  advancedDebug({ log: 'after connected', sessionId: self.id });
 
   // On initial connect, spin up all the universal publishers.
   Fiber(function () {
@@ -386,22 +395,20 @@ var Session = function (server, version, socket, options) {
         self.close();
       },
       sendPing: function () {
-        self.send({msg: 'ping'});
-      }
+        self.send({ msg: 'ping' });
+      },
     });
     self.heartbeat.start();
   }
 
-  Package['facts-base'] && Package['facts-base'].Facts.incrementServerFact(
-    "livedata", "sessions", 1);
+  Package['facts-base'] &&
+    Package['facts-base'].Facts.incrementServerFact('livedata', 'sessions', 1);
 };
 
 Object.assign(Session.prototype, {
-
   sendReady: function (subscriptionIds) {
     var self = this;
-    if (self._isSending)
-      self.send({msg: "ready", subs: subscriptionIds});
+    if (self._isSending) self.send({ msg: 'ready', subs: subscriptionIds });
     else {
       _.each(subscriptionIds, function (subscriptionId) {
         self._pendingReady.push(subscriptionId);
@@ -410,40 +417,71 @@ Object.assign(Session.prototype, {
   },
 
   _canSend(collectionName) {
-    return this._isSending || !this.server.getPublicationStrategy(collectionName).useCollectionView;
+    return (
+      this._isSending ||
+      !this.server.getPublicationStrategy(collectionName).useCollectionView
+    );
   },
 
-
   sendAdded(collectionName, id, fields) {
-    advancedDebug({log: 'sendAdded begins', collectionName, docId: id, id, fields});
+    advancedDebug({
+      log: 'sendAdded begins',
+      collectionName,
+      docId: id,
+      id,
+      fields,
+    });
     if (this._canSend(collectionName)) {
-      advancedDebug({log: 'sendAdded send', collectionName, docId: id, id, fields});
-      this.send({msg: "added", collection: collectionName, id, fields});
+      advancedDebug({
+        log: 'sendAdded send',
+        collectionName,
+        docId: id,
+        id,
+        fields,
+      });
+      this.send({ msg: 'added', collection: collectionName, id, fields });
     }
   },
 
   sendChanged(collectionName, id, fields) {
-    advancedDebug({log: 'sendChanged begins', collectionName, docId: id, id, fields});
-    if (_.isEmpty(fields))
-      return;
+    advancedDebug({
+      log: 'sendChanged begins',
+      collectionName,
+      docId: id,
+      id,
+      fields,
+    });
+    if (_.isEmpty(fields)) return;
 
-    advancedDebug({log: 'sendChanged not empty', collectionName, docId: id, id, fields});
+    advancedDebug({
+      log: 'sendChanged not empty',
+      collectionName,
+      docId: id,
+      id,
+      fields,
+    });
     if (this._canSend(collectionName)) {
-      advancedDebug({log: 'sendChanged send', collectionName, docId: id, id, fields});
+      advancedDebug({
+        log: 'sendChanged send',
+        collectionName,
+        docId: id,
+        id,
+        fields,
+      });
       this.send({
-        msg: "changed",
+        msg: 'changed',
         collection: collectionName,
         id,
-        fields
+        fields,
       });
     }
   },
 
   sendRemoved(collectionName, id) {
-    advancedDebug({log: 'sendRemoved begins', collectionName, docId: id, id});
+    advancedDebug({ log: 'sendRemoved begins', collectionName, docId: id, id });
     if (this._canSend(collectionName)) {
-      advancedDebug({log: 'sendRemoved send', collectionName, docId: id, id});
-      this.send({msg: "removed", collection: collectionName, id});
+      advancedDebug({ log: 'sendRemoved send', collectionName, docId: id, id });
+      this.send({ msg: 'removed', collection: collectionName, id });
     }
   },
 
@@ -452,7 +490,7 @@ Object.assign(Session.prototype, {
     return {
       added: _.bind(self.sendAdded, self),
       changed: _.bind(self.sendChanged, self),
-      removed: _.bind(self.sendRemoved, self)
+      removed: _.bind(self.sendRemoved, self),
     };
   },
 
@@ -460,8 +498,7 @@ Object.assign(Session.prototype, {
     var self = this;
     var ret = self.collectionViews.get(collectionName);
     if (!ret) {
-      ret = new SessionCollectionView(collectionName,
-                                        self.getSendCallbacks());
+      ret = new SessionCollectionView(collectionName, self.getSendCallbacks());
       self.collectionViews.set(collectionName, ret);
     }
     return ret;
@@ -481,7 +518,7 @@ Object.assign(Session.prototype, {
       const view = this.getCollectionView(collectionName);
       view.removed(subscriptionHandle, id);
       if (view.isEmpty()) {
-         this.collectionViews.delete(collectionName);
+        this.collectionViews.delete(collectionName);
       }
     } else {
       this.sendRemoved(collectionName, id);
@@ -517,8 +554,7 @@ Object.assign(Session.prototype, {
     // was attached, close it.
 
     // Already destroyed.
-    if (! self.inQueue)
-      return;
+    if (!self.inQueue) return;
 
     // Drop the merge box data immediately.
     self.inQueue = null;
@@ -534,8 +570,12 @@ Object.assign(Session.prototype, {
       self.socket._meteorSession = null;
     }
 
-    Package['facts-base'] && Package['facts-base'].Facts.incrementServerFact(
-      "livedata", "sessions", -1);
+    Package['facts-base'] &&
+      Package['facts-base'].Facts.incrementServerFact(
+        'livedata',
+        'sessions',
+        -1
+      );
 
     Meteor.defer(function () {
       // Stop callbacks can yield, so we defer this on close.
@@ -560,7 +600,7 @@ Object.assign(Session.prototype, {
     var self = this;
     if (self.socket) {
       if (Meteor._printSentDDP)
-        Meteor._debug("Sent DDP", DDPCommon.stringifyDDP(msg));
+        Meteor._debug('Sent DDP', DDPCommon.stringifyDDP(msg));
       self.socket.send(DDPCommon.stringifyDDP(msg));
     }
   },
@@ -568,9 +608,8 @@ Object.assign(Session.prototype, {
   // Send a connection error.
   sendError: function (reason, offendingMessage) {
     var self = this;
-    var msg = {msg: 'error', reason: reason};
-    if (offendingMessage)
-      msg.offendingMessage = offendingMessage;
+    var msg = { msg: 'error', reason: reason };
+    if (offendingMessage) msg.offendingMessage = offendingMessage;
     self.send(msg);
   },
 
@@ -591,7 +630,8 @@ Object.assign(Session.prototype, {
   // other).
   processMessage: function (msg_in) {
     var self = this;
-    if (!self.inQueue) // we have been destroyed.
+    if (!self.inQueue)
+      // we have been destroyed.
       return;
 
     // Respond to ping and pong messages immediately without queuing.
@@ -613,8 +653,7 @@ Object.assign(Session.prototype, {
     }
 
     if (self.version !== 'pre1' && msg_in.msg === 'ping') {
-      if (self._respondToPings)
-        self.send({msg: "pong", id: msg_in.id});
+      if (self._respondToPings) self.send({ msg: 'pong', id: msg_in.id });
       return;
     }
     if (self.version !== 'pre1' && msg_in.msg === 'pong') {
@@ -623,8 +662,7 @@ Object.assign(Session.prototype, {
     }
 
     self.inQueue.push(msg_in);
-    if (self.workerRunning)
-      return;
+    if (self.workerRunning) return;
     self.workerRunning = true;
 
     var processNext = function () {
@@ -638,8 +676,7 @@ Object.assign(Session.prototype, {
         var blocked = true;
 
         var unblock = function () {
-          if (!blocked)
-            return; // idempotent
+          if (!blocked) return; // idempotent
           blocked = false;
           processNext();
         };
@@ -651,8 +688,7 @@ Object.assign(Session.prototype, {
 
         if (_.has(self.protocol_handlers, msg.msg))
           self.protocol_handlers[msg.msg].call(self, msg, unblock);
-        else
-          self.sendError('Bad request', msg);
+        else self.sendError('Bad request', msg);
         unblock(); // in case the handler didn't already do it
       }).run();
     };
@@ -669,17 +705,21 @@ Object.assign(Session.prototype, {
       self.cachedUnblock = unblock;
 
       // reject malformed messages
-      if (typeof (msg.id) !== "string" ||
-          typeof (msg.name) !== "string" ||
-          (('params' in msg) && !(msg.params instanceof Array))) {
-        self.sendError("Malformed subscription", msg);
+      if (
+        typeof msg.id !== 'string' ||
+        typeof msg.name !== 'string' ||
+        ('params' in msg && !(msg.params instanceof Array))
+      ) {
+        self.sendError('Malformed subscription', msg);
         return;
       }
 
       if (!self.server.publish_handlers[msg.name]) {
         self.send({
-          msg: 'nosub', id: msg.id,
-          error: new Meteor.Error(404, `Subscription '${msg.name}' not found`)});
+          msg: 'nosub',
+          id: msg.id,
+          error: new Meteor.Error(404, `Subscription '${msg.name}' not found`),
+        });
         return;
       }
 
@@ -699,20 +739,22 @@ Object.assign(Session.prototype, {
         var rateLimiterInput = {
           userId: self.userId,
           clientAddress: self.connectionHandle.clientAddress,
-          type: "subscription",
+          type: 'subscription',
           name: msg.name,
-          connectionId: self.id
+          connectionId: self.id,
         };
 
         DDPRateLimiter._increment(rateLimiterInput);
         var rateLimitResult = DDPRateLimiter._check(rateLimiterInput);
         if (!rateLimitResult.allowed) {
           self.send({
-            msg: 'nosub', id: msg.id,
+            msg: 'nosub',
+            id: msg.id,
             error: new Meteor.Error(
               'too-many-requests',
               DDPRateLimiter.getErrorMessage(rateLimitResult),
-              {timeToReset: rateLimitResult.timeToReset})
+              { timeToReset: rateLimitResult.timeToReset }
+            ),
           });
           return;
         }
@@ -738,11 +780,13 @@ Object.assign(Session.prototype, {
       // Reject malformed messages.
       // For now, we silently ignore unknown attributes,
       // for forwards compatibility.
-      if (typeof (msg.id) !== "string" ||
-          typeof (msg.method) !== "string" ||
-          (('params' in msg) && !(msg.params instanceof Array)) ||
-          (('randomSeed' in msg) && (typeof msg.randomSeed !== "string"))) {
-        self.sendError("Malformed method invocation", msg);
+      if (
+        typeof msg.id !== 'string' ||
+        typeof msg.method !== 'string' ||
+        ('params' in msg && !(msg.params instanceof Array)) ||
+        ('randomSeed' in msg && typeof msg.randomSeed !== 'string')
+      ) {
+        self.sendError('Malformed method invocation', msg);
         return;
       }
 
@@ -751,7 +795,7 @@ Object.assign(Session.prototype, {
       // Set up to mark the method as satisfied once all observers
       // (and subscriptions) have reacted to any writes that were
       // done.
-      var fence = new DDPServer._WriteFence;
+      var fence = new DDPServer._WriteFence();
       fence.onAllCommitted(function () {
         // Retire the fence so that future writes are allowed.
         // This means that callbacks like timers are free to use
@@ -760,20 +804,24 @@ Object.assign(Session.prototype, {
         // writes will be included in the fence.
         fence.retire();
         self.send({
-          msg: 'updated', methods: [msg.id]});
+          msg: 'updated',
+          methods: [msg.id],
+        });
       });
 
       // Find the handler
       var handler = self.server.method_handlers[msg.method];
       if (!handler) {
         self.send({
-          msg: 'result', id: msg.id,
-          error: new Meteor.Error(404, `Method '${msg.method}' not found`)});
+          msg: 'result',
+          id: msg.id,
+          error: new Meteor.Error(404, `Method '${msg.method}' not found`),
+        });
         fence.arm();
         return;
       }
 
-      var setUserId = function(userId) {
+      var setUserId = function (userId) {
         self._setUserId(userId);
       };
 
@@ -783,7 +831,7 @@ Object.assign(Session.prototype, {
         setUserId: setUserId,
         unblock: unblock,
         connection: self.connectionHandle,
-        randomSeed: randomSeed
+        randomSeed: randomSeed,
       });
 
       const promise = new Promise((resolve, reject) => {
@@ -796,26 +844,29 @@ Object.assign(Session.prototype, {
           var rateLimiterInput = {
             userId: self.userId,
             clientAddress: self.connectionHandle.clientAddress,
-            type: "method",
+            type: 'method',
             name: msg.method,
-            connectionId: self.id
+            connectionId: self.id,
           };
           DDPRateLimiter._increment(rateLimiterInput);
-          var rateLimitResult = DDPRateLimiter._check(rateLimiterInput)
+          var rateLimitResult = DDPRateLimiter._check(rateLimiterInput);
           if (!rateLimitResult.allowed) {
-            reject(new Meteor.Error(
-              "too-many-requests",
-              DDPRateLimiter.getErrorMessage(rateLimitResult),
-              {timeToReset: rateLimitResult.timeToReset}
-            ));
+            reject(
+              new Meteor.Error(
+                'too-many-requests',
+                DDPRateLimiter.getErrorMessage(rateLimitResult),
+                { timeToReset: rateLimitResult.timeToReset }
+              )
+            );
             return;
           }
         }
 
         const getCurrentMethodInvocationResult = () => {
-          const currentContext = DDP._CurrentMethodInvocation._setNewContextAndGetCurrent(
-            invocation
-          );
+          const currentContext =
+            DDP._CurrentMethodInvocation._setNewContextAndGetCurrent(
+              invocation
+            );
 
           try {
             let result;
@@ -838,7 +889,12 @@ Object.assign(Session.prototype, {
           }
         };
 
-        resolve(DDPServer._CurrentWriteFence.withValue(fence, getCurrentMethodInvocationResult));
+        resolve(
+          DDPServer._CurrentWriteFence.withValue(
+            fence,
+            getCurrentMethodInvocationResult
+          )
+        );
       });
 
       function finish() {
@@ -847,25 +903,28 @@ Object.assign(Session.prototype, {
       }
 
       const payload = {
-        msg: "result",
-        id: msg.id
+        msg: 'result',
+        id: msg.id,
       };
 
-      promise.then(result => {
-        finish();
-        if (result !== undefined) {
-          payload.result = result;
+      promise.then(
+        (result) => {
+          finish();
+          if (result !== undefined) {
+            payload.result = result;
+          }
+          self.send(payload);
+        },
+        (exception) => {
+          finish();
+          payload.error = wrapInternalException(
+            exception,
+            `while invoking method '${msg.method}'`
+          );
+          self.send(payload);
         }
-        self.send(payload);
-      }, (exception) => {
-        finish();
-        payload.error = wrapInternalException(
-          exception,
-          `while invoking method '${msg.method}'`
-        );
-        self.send(payload);
-      });
-    }
+      );
+    },
   },
 
   _eachSub: function (f) {
@@ -889,18 +948,19 @@ Object.assign(Session.prototype, {
         leftValue.documents.forEach(function (doc, id) {
           self.sendRemoved(collectionName, id);
         });
-      }
+      },
     });
   },
 
   // Sets the current user id in all appropriate contexts and reruns
   // all subscriptions
-  _setUserId: function(userId) {
+  _setUserId: function (userId) {
     var self = this;
 
-    if (userId !== null && typeof userId !== "string")
-      throw new Error("setUserId must be called on string or null, not " +
-                      typeof userId);
+    if (userId !== null && typeof userId !== 'string')
+      throw new Error(
+        'setUserId must be called on string or null, not ' + typeof userId
+      );
 
     // Prevent newly-created universal subscriptions from being added to our
     // session. They will be found below when we call startUniversalSubs.
@@ -967,8 +1027,7 @@ Object.assign(Session.prototype, {
   _startSubscription: function (handler, subId, params, name) {
     var self = this;
 
-    var sub = new Subscription(
-      self, handler, subId, params, name);
+    var sub = new Subscription(self, handler, subId, params, name);
 
     let unblockHander = self.cachedUnblock;
     // _startSubscription may call from a lot places
@@ -976,10 +1035,8 @@ Object.assign(Session.prototype, {
     // assign the cachedUnblock
     sub.unblock = unblockHander || (() => {});
 
-    if (subId)
-      self._namedSubs.set(subId, sub);
-    else
-      self._universalSubs.push(sub);
+    if (subId) self._namedSubs.set(subId, sub);
+    else self._universalSubs.push(sub);
 
     sub._runHandler();
   },
@@ -999,13 +1056,15 @@ Object.assign(Session.prototype, {
       }
     }
 
-    var response = {msg: 'nosub', id: subId};
+    var response = { msg: 'nosub', id: subId };
 
     if (error) {
       response.error = wrapInternalException(
         error,
-        subName ? ("from sub " + subName + " id " + subId)
-          : ("from sub id " + subId));
+        subName
+          ? 'from sub ' + subName + ' id ' + subId
+          : 'from sub id ' + subId
+      );
     }
 
     self.send(response);
@@ -1042,12 +1101,10 @@ Object.assign(Session.prototype, {
     // This could be computed once at startup instead of every time.
     var httpForwardedCount = parseInt(process.env['HTTP_FORWARDED_COUNT']) || 0;
 
-    if (httpForwardedCount === 0)
-      return self.socket.remoteAddress;
+    if (httpForwardedCount === 0) return self.socket.remoteAddress;
 
-    var forwardedFor = self.socket.headers["x-forwarded-for"];
-    if (! _.isString(forwardedFor))
-      return null;
+    var forwardedFor = self.socket.headers['x-forwarded-for'];
+    if (!_.isString(forwardedFor)) return null;
     forwardedFor = forwardedFor.trim().split(/\s*,\s*/);
 
     // Typically the first value in the `x-forwarded-for` header is
@@ -1063,7 +1120,7 @@ Object.assign(Session.prototype, {
       return null;
 
     return forwardedFor[forwardedFor.length - httpForwardedCount];
-  }
+  },
 });
 
 /******************************************************************************/
@@ -1080,8 +1137,7 @@ Object.assign(Session.prototype, {
  * @instanceName this
  * @showInstanceName true
  */
-var Subscription = function (
-    session, handler, subscriptionId, params, name) {
+var Subscription = function (session, handler, subscriptionId, params, name) {
   var self = this;
   self._session = session; // type is Session
 
@@ -1147,15 +1203,19 @@ var Subscription = function (
 
   self._idFilter = {
     idStringify: MongoID.idStringify,
-    idParse: MongoID.idParse
+    idParse: MongoID.idParse,
   };
 
-  Package['facts-base'] && Package['facts-base'].Facts.incrementServerFact(
-    "livedata", "subscriptions", 1);
+  Package['facts-base'] &&
+    Package['facts-base'].Facts.incrementServerFact(
+      'livedata',
+      'subscriptions',
+      1
+    );
 };
 
 Object.assign(Subscription.prototype, {
-  _runHandler: function() {
+  _runHandler: function () {
     // XXX should we unblock() here? Either before running the publish
     // function, or before running _publishCursor.
     //
@@ -1197,7 +1257,7 @@ Object.assign(Subscription.prototype, {
     if (isThenable) {
       Promise.resolve(resultOrThenable).then(
         (...args) => self._publishHandlerResult.bind(self)(...args),
-        e => self.error(e)
+        (e) => self.error(e)
       );
     } else {
       self._publishHandlerResult(resultOrThenable);
@@ -1238,8 +1298,10 @@ Object.assign(Subscription.prototype, {
       self.ready();
     } else if (_.isArray(res)) {
       // Check all the elements are cursors
-      if (! _.all(res, isCursor)) {
-        self.error(new Error("Publish function returned an array of non-Cursors"));
+      if (!_.all(res, isCursor)) {
+        self.error(
+          new Error('Publish function returned an array of non-Cursors')
+        );
         return;
       }
       // Find duplicate collection names
@@ -1249,13 +1311,16 @@ Object.assign(Subscription.prototype, {
       for (var i = 0; i < res.length; ++i) {
         var collectionName = res[i]._getCollectionName();
         if (_.has(collectionNames, collectionName)) {
-          self.error(new Error(
-            "Publish function returned multiple cursors for collection " +
-              collectionName));
+          self.error(
+            new Error(
+              'Publish function returned multiple cursors for collection ' +
+                collectionName
+            )
+          );
           return;
         }
         collectionNames[collectionName] = true;
-      };
+      }
 
       try {
         _.each(res, function (cur) {
@@ -1270,8 +1335,12 @@ Object.assign(Subscription.prototype, {
       // Truthy values other than cursors or arrays are probably a
       // user mistake (possible returning a Mongo document via, say,
       // `coll.findOne()`).
-      self.error(new Error("Publish function can only return a Cursor or "
-                           + "an array of Cursors"));
+      self.error(
+        new Error(
+          'Publish function can only return a Cursor or ' +
+            'an array of Cursors'
+        )
+      );
     }
   },
 
@@ -1280,14 +1349,17 @@ Object.assign(Subscription.prototype, {
   // disconnects, as well as during setUserId re-runs. It does *NOT* send
   // removed messages for the published objects; if that is necessary, call
   // _removeAllDocuments first.
-  _deactivate: function() {
+  _deactivate: function () {
     var self = this;
-    if (self._deactivated)
-      return;
+    if (self._deactivated) return;
     self._deactivated = true;
     self._callStopCallbacks();
-    Package['facts-base'] && Package['facts-base'].Facts.incrementServerFact(
-      "livedata", "subscriptions", -1);
+    Package['facts-base'] &&
+      Package['facts-base'].Facts.incrementServerFact(
+        'livedata',
+        'subscriptions',
+        -1
+      );
   },
 
   _callStopCallbacks: function () {
@@ -1320,8 +1392,12 @@ Object.assign(Subscription.prototype, {
   _recreate: function () {
     var self = this;
     return new Subscription(
-      self._session, self._handler, self._subscriptionId, self._params,
-      self._name);
+      self._session,
+      self._handler,
+      self._subscriptionId,
+      self._params,
+      self._name
+    );
   },
 
   /**
@@ -1333,8 +1409,7 @@ Object.assign(Subscription.prototype, {
    */
   error: function (error) {
     var self = this;
-    if (self._isDeactivated())
-      return;
+    if (self._isDeactivated()) return;
     self._session._stopSubscription(self._subscriptionId, error);
   },
 
@@ -1351,8 +1426,7 @@ Object.assign(Subscription.prototype, {
    */
   stop: function () {
     var self = this;
-    if (self._isDeactivated())
-      return;
+    if (self._isDeactivated()) return;
     self._session._stopSubscription(self._subscriptionId);
   },
 
@@ -1366,10 +1440,8 @@ Object.assign(Subscription.prototype, {
   onStop: function (callback) {
     var self = this;
     callback = Meteor.bindEnvironment(callback, 'onStop callback', self);
-    if (self._isDeactivated())
-      callback();
-    else
-      self._stopCallbacks.push(callback);
+    if (self._isDeactivated()) callback();
+    else self._stopCallbacks.push(callback);
   },
 
   // This returns true if the sub has been deactivated, *OR* if the session was
@@ -1389,12 +1461,14 @@ Object.assign(Subscription.prototype, {
    * @param {String} id The new document's ID.
    * @param {Object} fields The fields in the new document.  If `_id` is present it is ignored.
    */
-  added (collectionName, id, fields) {
-    if (this._isDeactivated())
-      return;
+  added(collectionName, id, fields) {
+    if (this._isDeactivated()) return;
     id = this._idFilter.idStringify(id);
 
-    if (this._session.server.getPublicationStrategy(collectionName).doAccountingForCollection) {
+    if (
+      this._session.server.getPublicationStrategy(collectionName)
+        .doAccountingForCollection
+    ) {
       let ids = this._documents.get(collectionName);
       if (ids == null) {
         ids = new Set();
@@ -1415,9 +1489,8 @@ Object.assign(Subscription.prototype, {
    * @param {String} id The changed document's ID.
    * @param {Object} fields The fields in the document that have changed, together with their new values.  If a field is not present in `fields` it was left unchanged; if it is present in `fields` and has a value of `undefined` it was removed from the document.  If `_id` is present it is ignored.
    */
-  changed (collectionName, id, fields) {
-    if (this._isDeactivated())
-      return;
+  changed(collectionName, id, fields) {
+    if (this._isDeactivated()) return;
     id = this._idFilter.idStringify(id);
     this._session.changed(this._subscriptionHandle, collectionName, id, fields);
   },
@@ -1430,12 +1503,14 @@ Object.assign(Subscription.prototype, {
    * @param {String} collection The name of the collection that the document has been removed from.
    * @param {String} id The ID of the document that has been removed.
    */
-  removed (collectionName, id) {
-    if (this._isDeactivated())
-      return;
+  removed(collectionName, id) {
+    if (this._isDeactivated()) return;
     id = this._idFilter.idStringify(id);
 
-    if (this._session.server.getPublicationStrategy(collectionName).doAccountingForCollection) {
+    if (
+      this._session.server.getPublicationStrategy(collectionName)
+        .doAccountingForCollection
+    ) {
       // We don't bother to delete sets of things in a collection if the
       // collection is empty.  It could break _removeAllDocuments.
       this._documents.get(collectionName).delete(id);
@@ -1452,15 +1527,13 @@ Object.assign(Subscription.prototype, {
    */
   ready: function () {
     var self = this;
-    if (self._isDeactivated())
-      return;
-    if (!self._subscriptionId)
-      return;  // Unnecessary but ignored for universal sub
+    if (self._isDeactivated()) return;
+    if (!self._subscriptionId) return; // Unnecessary but ignored for universal sub
     if (!self._ready) {
       self._session.sendReady([self._subscriptionId]);
       self._ready = true;
     }
-  }
+  },
 });
 
 /******************************************************************************/
@@ -1491,12 +1564,12 @@ Server = function (options = {}) {
   // of an array so we can safely remove one from the list while
   // iterating over it.
   self.onConnectionHook = new Hook({
-    debugPrintExceptions: "onConnection callback"
+    debugPrintExceptions: 'onConnection callback',
   });
 
   // Map of callbacks to call when a new message comes in.
   self.onMessageHook = new Hook({
-    debugPrintExceptions: "onMessage callback"
+    debugPrintExceptions: 'onMessage callback',
   });
 
   self.publish_handlers = {};
@@ -1508,22 +1581,21 @@ Server = function (options = {}) {
 
   self.sessions = new Map(); // map from id to session
 
-  self.stream_server = new StreamServer;
+  self.stream_server = new StreamServer();
 
   self.stream_server.register(function (socket) {
     // socket implements the SockJSConnection interface
     socket._meteorSession = null;
 
     var sendError = function (reason, offendingMessage) {
-      var msg = {msg: 'error', reason: reason};
-      if (offendingMessage)
-        msg.offendingMessage = offendingMessage;
+      var msg = { msg: 'error', reason: reason };
+      if (offendingMessage) msg.offendingMessage = offendingMessage;
       socket.send(DDPCommon.stringifyDDP(msg));
     };
 
     socket.on('data', function (raw_msg) {
       if (Meteor._printReceivedDDP) {
-        Meteor._debug("Received DDP", raw_msg);
+        Meteor._debug('Received DDP', raw_msg);
       }
       try {
         try {
@@ -1539,7 +1611,7 @@ Server = function (options = {}) {
 
         if (msg.msg === 'connect') {
           if (socket._meteorSession) {
-            sendError("Already connected", msg);
+            sendError('Already connected', msg);
             return;
           }
           Fiber(function () {
@@ -1555,7 +1627,7 @@ Server = function (options = {}) {
         socket._meteorSession.processMessage(msg);
       } catch (e) {
         // XXX print stack nicely
-        Meteor._debug("Internal exception while processing message", msg, e);
+        Meteor._debug('Internal exception while processing message', msg, e);
       }
     });
 
@@ -1570,7 +1642,6 @@ Server = function (options = {}) {
 };
 
 Object.assign(Server.prototype, {
-
   /**
    * @summary Register a callback to be called when a new DDP connection is made to the server.
    * @locus Server
@@ -1610,8 +1681,10 @@ Object.assign(Server.prototype, {
    * @return {{useCollectionView: boolean, doAccountingForCollection: boolean}}
    */
   getPublicationStrategy(collectionName) {
-    return this._publicationStrategies[collectionName]
-      || this.options.defaultPublicationStrategy;
+    return (
+      this._publicationStrategies[collectionName] ||
+      this.options.defaultPublicationStrategy
+    );
   },
 
   /**
@@ -1631,25 +1704,36 @@ Object.assign(Server.prototype, {
 
     // The connect message must specify a version and an array of supported
     // versions, and it must claim to support what it is proposing.
-    if (!(typeof (msg.version) === 'string' &&
-          _.isArray(msg.support) &&
-          _.all(msg.support, _.isString) &&
-          _.contains(msg.support, msg.version))) {
-      socket.send(DDPCommon.stringifyDDP({msg: 'failed',
-                                version: DDPCommon.SUPPORTED_DDP_VERSIONS[0]}));
+    if (
+      !(
+        typeof msg.version === 'string' &&
+        _.isArray(msg.support) &&
+        _.all(msg.support, _.isString) &&
+        _.contains(msg.support, msg.version)
+      )
+    ) {
+      socket.send(
+        DDPCommon.stringifyDDP({
+          msg: 'failed',
+          version: DDPCommon.SUPPORTED_DDP_VERSIONS[0],
+        })
+      );
       socket.close();
       return;
     }
 
     // In the future, handle session resumption: something like:
     //  socket._meteorSession = self.sessions[msg.session]
-    var version = calculateVersion(msg.support, DDPCommon.SUPPORTED_DDP_VERSIONS);
+    var version = calculateVersion(
+      msg.support,
+      DDPCommon.SUPPORTED_DDP_VERSIONS
+    );
 
     if (msg.version !== version) {
       // The best version to use (according to the client's stated preferences)
       // is not the one the client is trying to use. Inform them about the best
       // version to use.
-      socket.send(DDPCommon.stringifyDDP({msg: 'failed', version: version}));
+      socket.send(DDPCommon.stringifyDDP({ msg: 'failed', version: version }));
       socket.close();
       return;
     }
@@ -1699,7 +1783,7 @@ Object.assign(Server.prototype, {
   publish: function (name, handler, options) {
     var self = this;
 
-    if (! _.isObject(name)) {
+    if (!_.isObject(name)) {
       options = options || {};
 
       if (name && name in self.publish_handlers) {
@@ -1718,22 +1802,22 @@ Object.assign(Server.prototype, {
         if (!self.warned_about_autopublish) {
           self.warned_about_autopublish = true;
           Meteor._debug(
-    "** You've set up some data subscriptions with Meteor.publish(), but\n" +
-    "** you still have autopublish turned on. Because autopublish is still\n" +
-    "** on, your Meteor.publish() calls won't have much effect. All data\n" +
-    "** will still be sent to all clients.\n" +
-    "**\n" +
-    "** Turn off autopublish by removing the autopublish package:\n" +
-    "**\n" +
-    "**   $ meteor remove autopublish\n" +
-    "**\n" +
-    "** .. and make sure you have Meteor.publish() and Meteor.subscribe() calls\n" +
-    "** for each collection that you want clients to see.\n");
+            "** You've set up some data subscriptions with Meteor.publish(), but\n" +
+              '** you still have autopublish turned on. Because autopublish is still\n' +
+              "** on, your Meteor.publish() calls won't have much effect. All data\n" +
+              '** will still be sent to all clients.\n' +
+              '**\n' +
+              '** Turn off autopublish by removing the autopublish package:\n' +
+              '**\n' +
+              '**   $ meteor remove autopublish\n' +
+              '**\n' +
+              '** .. and make sure you have Meteor.publish() and Meteor.subscribe() calls\n' +
+              '** for each collection that you want clients to see.\n'
+          );
         }
       }
 
-      if (name)
-        self.publish_handlers[name] = handler;
+      if (name) self.publish_handlers[name] = handler;
       else {
         self.universal_publish_handlers.push(handler);
         // Spin up the new publisher on any existing session too. Run each
@@ -1741,15 +1825,14 @@ Object.assign(Server.prototype, {
         // self.sessions to change while we're running this loop.
         self.sessions.forEach(function (session) {
           if (!session._dontStartNewUniversalSubs) {
-            Fiber(function() {
+            Fiber(function () {
               session._startSubscription(handler);
             }).run();
           }
         });
       }
-    }
-    else{
-      _.each(name, function(value, key) {
+    } else {
+      _.each(name, function (value, key) {
         self.publish(key, value, {});
       });
     }
@@ -1779,7 +1862,7 @@ Object.assign(Server.prototype, {
   },
 
   call: function (name, ...args) {
-    if (args.length && typeof args[args.length - 1] === "function") {
+    if (args.length && typeof args[args.length - 1] === 'function') {
       // If it's a function, the last argument is the result callback, not
       // a parameter to the remote method.
       var callback = args.pop();
@@ -1796,7 +1879,7 @@ Object.assign(Server.prototype, {
   apply: function (name, args, options, callback) {
     // We were passed 3 arguments. They may be either (name, args, options)
     // or (name, args, callback)
-    if (! callback && typeof options === 'function') {
+    if (!callback && typeof options === 'function') {
       callback = options;
       options = {};
     } else {
@@ -1812,8 +1895,8 @@ Object.assign(Server.prototype, {
     // can change this if there's a real use case).
     if (callback) {
       promise.then(
-        result => callback(undefined, result),
-        exception => callback(exception)
+        (result) => callback(undefined, result),
+        (exception) => callback(exception)
       );
     } else {
       return promise.await();
@@ -1824,7 +1907,7 @@ Object.assign(Server.prototype, {
   applyAsync: function (name, args, options) {
     // Run the handler
     var handler = this.method_handlers[name];
-    if (! handler) {
+    if (!handler) {
       return Promise.reject(
         new Meteor.Error(404, `Method '${name}' not found`)
       );
@@ -1834,7 +1917,7 @@ Object.assign(Server.prototype, {
     // get the user state from the outer method or publish function, otherwise
     // don't allow setUserId to be called
     var userId = null;
-    var setUserId = function() {
+    var setUserId = function () {
       throw new Error("Can't call setUserId on a server initiated method call");
     };
     var connection = null;
@@ -1843,14 +1926,14 @@ Object.assign(Server.prototype, {
     var randomSeed = null;
     if (currentMethodInvocation) {
       userId = currentMethodInvocation.userId;
-      setUserId = function(userId) {
+      setUserId = function (userId) {
         currentMethodInvocation.setUserId(userId);
       };
       connection = currentMethodInvocation.connection;
       randomSeed = DDPCommon.makeRpcSeed(currentMethodInvocation, name);
     } else if (currentPublicationInvocation) {
       userId = currentPublicationInvocation.userId;
-      setUserId = function(userId) {
+      setUserId = function (userId) {
         currentPublicationInvocation._session._setUserId(userId);
       };
       connection = currentPublicationInvocation.connection;
@@ -1861,32 +1944,35 @@ Object.assign(Server.prototype, {
       userId,
       setUserId,
       connection,
-      randomSeed
+      randomSeed,
     });
 
-    return new Promise(resolve => resolve(
-      DDP._CurrentMethodInvocation.withValue(
-        invocation,
-        () => maybeAuditArgumentChecks(
-          handler, invocation, EJSON.clone(args),
-          "internal call to '" + name + "'"
+    return new Promise((resolve) =>
+      resolve(
+        DDP._CurrentMethodInvocation.withValue(invocation, () =>
+          maybeAuditArgumentChecks(
+            handler,
+            invocation,
+            EJSON.clone(args),
+            "internal call to '" + name + "'"
+          )
         )
       )
-    )).then(EJSON.clone);
+    ).then(EJSON.clone);
   },
 
   _urlForSession: function (sessionId) {
     var self = this;
     var session = self.sessions.get(sessionId);
-    if (session)
-      return session._socketUrl;
-    else
-      return null;
-  }
+    if (session) return session._socketUrl;
+    else return null;
+  },
 });
 
-var calculateVersion = function (clientSupportedVersions,
-                                 serverSupportedVersions) {
+var calculateVersion = function (
+  clientSupportedVersions,
+  serverSupportedVersions
+) {
   var correctVersion = _.find(clientSupportedVersions, function (version) {
     return _.contains(serverSupportedVersions, version);
   });
@@ -1897,7 +1983,6 @@ var calculateVersion = function (clientSupportedVersions,
 };
 
 DDPServer._calculateVersion = calculateVersion;
-
 
 // "blind" exceptions other than those that were deliberately thrown to signal
 // errors to the client
@@ -1910,7 +1995,11 @@ var wrapInternalException = function (exception, context) {
   if (exception.isClientSafe) {
     if (!(exception instanceof Meteor.Error)) {
       const originalMessage = exception.message;
-      exception = new Meteor.Error(exception.error, exception.reason, exception.details);
+      exception = new Meteor.Error(
+        exception.error,
+        exception.reason,
+        exception.details
+      );
       exception.message = originalMessage;
     }
     return exception;
@@ -1919,9 +2008,12 @@ var wrapInternalException = function (exception, context) {
   // Tests can set the '_expectedByTest' flag on an exception so it won't go to
   // the server log.
   if (!exception._expectedByTest) {
-    Meteor._debug("Exception " + context, exception.stack);
+    Meteor._debug('Exception ' + context, exception.stack);
     if (exception.sanitizedError) {
-      Meteor._debug("Sanitized and reported to the client as:", exception.sanitizedError);
+      Meteor._debug(
+        'Sanitized and reported to the client as:',
+        exception.sanitizedError
+      );
       Meteor._debug();
     }
   }
@@ -1931,15 +2023,17 @@ var wrapInternalException = function (exception, context) {
   // provided a "sanitized" version with more context than 500 Internal server
   // error? Use that.
   if (exception.sanitizedError) {
-    if (exception.sanitizedError.isClientSafe)
-      return exception.sanitizedError;
-    Meteor._debug("Exception " + context + " provides a sanitizedError that " +
-                  "does not have isClientSafe property set; ignoring");
+    if (exception.sanitizedError.isClientSafe) return exception.sanitizedError;
+    Meteor._debug(
+      'Exception ' +
+        context +
+        ' provides a sanitizedError that ' +
+        'does not have isClientSafe property set; ignoring'
+    );
   }
 
-  return new Meteor.Error(500, "Internal server error");
+  return new Meteor.Error(500, 'Internal server error');
 };
-
 
 // Audit argument checks, if the audit-argument-checks package exists (it is a
 // weak dependency of this package).
@@ -1947,7 +2041,11 @@ var maybeAuditArgumentChecks = function (f, context, args, description) {
   args = args || [];
   if (Package['audit-argument-checks']) {
     return Match._failIfArgumentsAreNotAllChecked(
-      f, context, args, description);
+      f,
+      context,
+      args,
+      description
+    );
   }
   return f.apply(context, args);
 };

@@ -19,7 +19,7 @@ DDPServer._WriteFence = function () {
 // that writes to databases should register their writes with it using
 // beginWrite().
 //
-DDPServer._CurrentWriteFence = new Meteor.EnvironmentVariable;
+DDPServer._CurrentWriteFence = new Meteor.EnvironmentVariable();
 
 _.extend(DDPServer._WriteFence.prototype, {
   // Start tracking a write, and return an object to represent it. The
@@ -30,22 +30,21 @@ _.extend(DDPServer._WriteFence.prototype, {
   beginWrite: function () {
     var self = this;
 
-    if (self.retired)
-      return { committed: function () {} };
+    if (self.retired) return { committed: function () {} };
 
     if (self.fired)
-      throw new Error("fence has already activated -- too late to add writes");
+      throw new Error('fence has already activated -- too late to add writes');
 
     self.outstanding_writes++;
     var committed = false;
     return {
       committed: function () {
         if (committed)
-          throw new Error("committed called twice on the same write");
+          throw new Error('committed called twice on the same write');
         committed = true;
         self.outstanding_writes--;
         self._maybeFire();
-      }
+      },
     };
   },
 
@@ -65,8 +64,9 @@ _.extend(DDPServer._WriteFence.prototype, {
   onBeforeFire: function (func) {
     var self = this;
     if (self.fired)
-      throw new Error("fence has already activated -- too late to " +
-                      "add a callback");
+      throw new Error(
+        'fence has already activated -- too late to ' + 'add a callback'
+      );
     self.before_fire_callbacks.push(func);
   },
 
@@ -74,15 +74,16 @@ _.extend(DDPServer._WriteFence.prototype, {
   onAllCommitted: function (func) {
     var self = this;
     if (self.fired)
-      throw new Error("fence has already activated -- too late to " +
-                      "add a callback");
+      throw new Error(
+        'fence has already activated -- too late to ' + 'add a callback'
+      );
     self.completion_callbacks.push(func);
   },
 
   // Convenience function. Arms the fence, then blocks until it fires.
   armAndWait: function () {
     var self = this;
-    var future = new Future;
+    var future = new Future();
     self.onAllCommitted(function () {
       future['return']();
     });
@@ -92,14 +93,13 @@ _.extend(DDPServer._WriteFence.prototype, {
 
   _maybeFire: function () {
     var self = this;
-    if (self.fired)
-      throw new Error("write fence already activated?");
+    if (self.fired) throw new Error('write fence already activated?');
     if (self.armed && !self.outstanding_writes) {
-      function invokeCallback (func) {
+      function invokeCallback(func) {
         try {
           func(self);
         } catch (err) {
-          Meteor._debug("exception in write fence callback", err);
+          Meteor._debug('exception in write fence callback', err);
         }
       }
 
@@ -124,8 +124,7 @@ _.extend(DDPServer._WriteFence.prototype, {
   // The fence must have already fired.
   retire: function () {
     var self = this;
-    if (! self.fired)
-      throw new Error("Can't retire a fence that hasn't fired.");
+    if (!self.fired) throw new Error("Can't retire a fence that hasn't fired.");
     self.retired = true;
-  }
+  },
 });
