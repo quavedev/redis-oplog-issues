@@ -7,11 +7,17 @@ import PollingObserveDriver from './PollingObserveDriver';
 import { getAdvancedDebug } from 'meteor/advanced-debug';
 
 export default function (cursorDescription, ordered, callbacks) {
-  getAdvancedDebug('redis-oplog')({ log: 'add observeChanges', cursorDescription });
+  getAdvancedDebug('redis-oplog')({
+    log: 'add observeChanges',
+    cursorDescription,
+  });
   try {
     const self = this;
     if (cursorDescription.options.tailable) {
-      getAdvancedDebug('redis-oplog')({ log: 'add observeChanges tailable', cursorDescription });
+      getAdvancedDebug('redis-oplog')({
+        log: 'add observeChanges tailable',
+        cursorDescription,
+      });
       return self._observeChangesTailable(
         cursorDescription,
         ordered,
@@ -138,7 +144,10 @@ export default function (cursorDescription, ordered, callbacks) {
           return f();
         }
       ); // invoke each function
-      getAdvancedDebug('redis-oplog')({ log: 'add observeChanges canUseOplog', canUseOplog });
+      getAdvancedDebug('redis-oplog')({
+        log: 'add observeChanges canUseOplog',
+        canUseOplog,
+      });
 
       var driverClass = canUseOplog
         ? RedisOplogObserveDriver

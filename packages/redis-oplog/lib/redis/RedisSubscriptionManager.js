@@ -119,7 +119,11 @@ class RedisSubscriptionManager {
     // messages from redis that contain our uid were handled
     // optimistically, so we can drop them.
     if (fromRedis && data[RedisPipe.UID] === this.uid) {
-      getAdvancedDebug('redis-oplog')({ log: 'uid dropped', docId: data?.d?._id, channel });
+      getAdvancedDebug('redis-oplog')({
+        log: 'uid dropped',
+        docId: data?.d?._id,
+        channel,
+      });
       return;
     }
 
@@ -142,7 +146,11 @@ class RedisSubscriptionManager {
     );
 
     if (subscribers.length === 0) {
-      getAdvancedDebug('redis-oplog')({ log: 'empty subscriber ', docId: data?.d?._id, channel });
+      getAdvancedDebug('redis-oplog')({
+        log: 'empty subscriber ',
+        docId: data?.d?._id,
+        channel,
+      });
       return;
     }
 
@@ -166,7 +174,11 @@ class RedisSubscriptionManager {
       // if by any chance it was deleted after it got dispatched
       // doc will be undefined
       if (!doc) {
-        getAdvancedDebug('redis-oplog')({ log: 'doc not found ', docId: data?.d?._id, channel });
+        getAdvancedDebug('redis-oplog')({
+          log: 'doc not found ',
+          docId: data?.d?._id,
+          channel,
+        });
         return;
       }
 
@@ -216,7 +228,11 @@ class RedisSubscriptionManager {
     const event = data[RedisPipe.EVENT];
     let doc = data[RedisPipe.DOC];
 
-    getAdvancedDebug('redis-oplog')({ log: 'getDoc.start', doc, docId: doc._id });
+    getAdvancedDebug('redis-oplog')({
+      log: 'getDoc.start',
+      doc,
+      docId: doc._id,
+    });
 
     if (
       collection._redisOplog &&

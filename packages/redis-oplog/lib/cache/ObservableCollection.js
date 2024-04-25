@@ -221,7 +221,11 @@ export default class ObservableCollection {
     const { limit, skip, ...cleanedOptions } = this.options;
     const doc = this.collection.findOne({ _id: docId }, cleanedOptions);
 
-    getAdvancedDebug('redis-oplog')({ log: 'store store addById', doc, docId: doc?._id });
+    getAdvancedDebug('redis-oplog')({
+      log: 'store store addById',
+      doc,
+      docId: doc?._id,
+    });
     this.store.set(docId, doc);
 
     if (doc) {

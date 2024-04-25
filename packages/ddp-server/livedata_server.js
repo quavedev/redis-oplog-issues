@@ -375,9 +375,15 @@ var Session = function (server, version, socket, options) {
     httpHeaders: self.socket.headers,
   };
 
-  getAdvancedDebug('ddp-server')({ log: 'before connected', sessionId: self.id });
+  getAdvancedDebug('ddp-server')({
+    log: 'before connected',
+    sessionId: self.id,
+  });
   self.send({ msg: 'connected', session: self.id });
-  getAdvancedDebug('ddp-server')({ log: 'after connected', sessionId: self.id });
+  getAdvancedDebug('ddp-server')({
+    log: 'after connected',
+    sessionId: self.id,
+  });
 
   // On initial connect, spin up all the universal publishers.
   Fiber(function () {
@@ -478,9 +484,19 @@ Object.assign(Session.prototype, {
   },
 
   sendRemoved(collectionName, id) {
-    getAdvancedDebug('ddp-server')({ log: 'sendRemoved begins', collectionName, docId: id, id });
+    getAdvancedDebug('ddp-server')({
+      log: 'sendRemoved begins',
+      collectionName,
+      docId: id,
+      id,
+    });
     if (this._canSend(collectionName)) {
-      getAdvancedDebug('ddp-server')({ log: 'sendRemoved send', collectionName, docId: id, id });
+      getAdvancedDebug('ddp-server')({
+        log: 'sendRemoved send',
+        collectionName,
+        docId: id,
+        id,
+      });
       this.send({ msg: 'removed', collection: collectionName, id });
     }
   },

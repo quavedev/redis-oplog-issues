@@ -81,7 +81,9 @@ export const advancedDebug = ({ log, trace = false, error, ...data }) => {
       !Object.entries(debugFieldsToFilter).some(match)
     ) {
       if (verboseAdvancedDebug) {
-        logMessage(`${logPrefix}[VERBOSE] not a single match, data: ${dataAsString}`);
+        logMessage(
+          `${logPrefix}[VERBOSE] not a single match, data: ${dataAsString}`
+        );
       }
       return;
     }
@@ -92,7 +94,9 @@ export const advancedDebug = ({ log, trace = false, error, ...data }) => {
       !Object.entries(debugFieldsToFilter).every(match)
     ) {
       if (verboseAdvancedDebug) {
-        logMessage(`${logPrefix}[VERBOSE] not all match, data: ${dataAsString}`);
+        logMessage(
+          `${logPrefix}[VERBOSE] not all match, data: ${dataAsString}`
+        );
       }
       return;
     }

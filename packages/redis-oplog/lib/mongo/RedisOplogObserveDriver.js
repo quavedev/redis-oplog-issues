@@ -94,7 +94,10 @@ export default class RedisOplogObserveDriver {
       try {
         LocalCollection._checkSupportedProjection(fields);
       } catch (e) {
-        getAdvancedDebug('redis-oplog')({ log: 'cursorSupported error', error: e });
+        getAdvancedDebug('redis-oplog')({
+          log: 'cursorSupported error',
+          error: e,
+        });
         if (e.name === 'MinimongoError') {
           return false;
         } else {
