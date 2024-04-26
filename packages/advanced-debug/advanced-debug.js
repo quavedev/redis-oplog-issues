@@ -36,8 +36,8 @@ function getObserveKeyFields(observeKeyString) {
       ...(observeKey?.selector?.teamId && {
         teamId: observeKey.selector.teamId,
       }),
-      ...(observeKey._id?.$in?.[0] && {
-          observerFirstId: observeKey._id && observeKey._id.$in[0],
+        ...(observeKey?.selector?._id?.$in?.[0] && {
+            observerFirstId: observeKey.selector._id && observeKey._id.$in[0],
         }),
     };
   } catch (e) {
