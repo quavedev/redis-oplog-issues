@@ -140,12 +140,18 @@ class RedisSubscriptionManager {
 
     let isSynthetic = data[RedisPipe.SYNTHETIC];
 
+    console.log(`isSynthetic`);
+
     debug(
       `[RedisSubscriptionManager] Received ${
         isSynthetic ? 'synthetic ' : ''
       }event: "${data[RedisPipe.EVENT]}" to "${channel}"`
     );
-
+    getAdvancedDebug('redis-oplog')({
+      log: 'subscriber ',
+      docId: data?.d?._id,
+      channel,
+    });
     if (subscribers.length === 0) {
       getAdvancedDebug('redis-oplog')({
         log: 'empty subscriber ',

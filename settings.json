@@ -4,20 +4,22 @@
       "allFieldsMustMatch": false,
       "debugFieldsToFilter": {
         "selector": "cam_7TKxN7ajqJtp45SaE",
-        "docId": "cam_7TKxN7ajqJtp45SaE",
-        "id": "BnDs77KP8v2nF8Kx3",
+        "channel": "links",
+        "collectionName": "links",
+        "docId": "KTu9HtqNReLeuxdT5",
+        "id": "KTu9HtqNReLeuxdT5",
         "logKey": "always-log"
       },
       "enabled": true,
       "matchEmptyData": false,
       "prefix": "reactivityTracker:",
-      "verboseAdvancedDebug": false
+      "verboseAdvancedDebug": true
     },
     "retryIntervalMs": 1000,
     "mutationDefaults": {
       "optimistic": true,
       "pushToRedis": true
     },
-    "debug": false
+    "debug": true
   }
 }
