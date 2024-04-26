@@ -27,8 +27,12 @@ const logError = (...args) => {
 
 function getObserveKeyFields(observeKeyString) {
   try {
-    if (!observeKeyString) return {};
+    if (!observeKeyString) {
+        return {};
+    }
+
     const observeKey = JSON.parse(observeKeyString);
+
     return {
       ...(observeKey.collectionName && {
         collectionName: observeKey.collectionName,
@@ -36,8 +40,17 @@ function getObserveKeyFields(observeKeyString) {
       ...(observeKey?.selector?.teamId && {
         teamId: observeKey.selector.teamId,
       }),
+      ...(observeKey?.selector?.campaignId && {
+        teamId: observeKey.selector.campaignId,
+      }),
         ...(observeKey?.selector?._id?.$in?.[0] && {
-            observerFirstId: observeKey.selector._id && observeKey._id.$in[0],
+            observerFirstId: observeKey.selector._id.$in[0],
+        }),
+        ...(observeKey?.selector?.teamId?.$in?.[0] && {
+            teamId: observeKey.selector.teamId.$in[0],
+        }),
+        ...(observeKey?.selector?.campaignId?.$in?.[0] && {
+            campaignId: observeKey.selector.campaignId.$in[0],
         }),
     };
   } catch (e) {
