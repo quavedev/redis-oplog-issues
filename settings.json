@@ -3,17 +3,18 @@
     "debugOptions": {
       "allFieldsMustMatch": false,
       "debugFieldsToFilter": {
-        "selector": "cam_7TKxN7ajqJtp45SaE",
+        "selector": "W3YDXncCWWgQB53WY",
         "channel": "links",
         "collectionName": "links",
-        "docId": "KTu9HtqNReLeuxdT5",
-        "id": "KTu9HtqNReLeuxdT5",
+        "docId": "W3YDXncCWWgQB53WY",
+        "id": "W3YDXncCWWgQB53WY",
         "logKey": "always-log"
       },
       "enabled": true,
+      "logFieldOnly": true,
       "matchEmptyData": false,
       "prefix": "reactivityTracker:",
-      "verboseAdvancedDebug": true
+      "verboseAdvancedDebug": false
     },
     "retryIntervalMs": 1000,
     "mutationDefaults": {

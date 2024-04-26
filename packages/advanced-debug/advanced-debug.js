@@ -17,6 +17,7 @@ const logMessage = (...args) => {
         log(...args);
     } catch (error) {
         // we don't want to log error, ReferenceError will happen in the startup of ddp-server
+        console.log(...args);
     }
 }
 
@@ -69,6 +70,7 @@ export const getAdvancedDebug =
                 allFieldsMustMatch = true,
                 verboseAdvancedDebug,
                 matchEmptyData = false,
+                logFieldOnly = false,
             } = getRedisOplogConfigJsonOrNull()?.debugOptions || {};
 
             const logPrefix = `${prefix} [${currentPackage}] ${log}`;
@@ -95,7 +97,7 @@ export const getAdvancedDebug =
                 ) {
                     if (verboseAdvancedDebug) {
                         logMessage(
-                            `${logPrefix}[VERBOSE] not a single match, data: ${dataAsString}`
+                            `[VERBOSE] ${logPrefix} not a single match, data: ${dataAsString}`
                         );
                     }
                     return;
@@ -108,7 +110,7 @@ export const getAdvancedDebug =
                 ) {
                     if (verboseAdvancedDebug) {
                         logMessage(
-                            `${logPrefix}[VERBOSE] not all match, data: ${dataAsString}`
+                            `[VERBOSE] ${logPrefix} not all match, data: ${dataAsString}`
                         );
                     }
                     return;
@@ -121,7 +123,7 @@ export const getAdvancedDebug =
                     .map(([key, value]) => `${key}: ${value}`)
                 : '';
             logMessage(
-                `${logPrefix} match={${emptyDataIsMatch ? 'empty' : matchedFields}}, data: ${dataAsString}`
+                logFieldOnly ? logPrefix :`${logPrefix} match={${emptyDataIsMatch ? 'empty' : matchedFields}}, data: ${dataAsString}`
             );
 
             if (trace) {
