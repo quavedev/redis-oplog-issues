@@ -1,5 +1,5 @@
-import {waitForHandleToBeReady, callWithPromise} from './sync_utils';
-import { Meteor } from 'meteor/meteor'
+import { waitForHandleToBeReady, callWithPromise } from './sync_utils';
+import { Meteor } from 'meteor/meteor';
 
 export default (suffix) => {
   const create = (...args) => {
@@ -32,7 +32,8 @@ export default (suffix) => {
 
   const upsertSync = (...args) => callWithPromise(`upsert.${suffix}`, ...args);
 
-  const subscribe = (...args) => Meteor.subscribe(`publication.${suffix}`, ...args);
+  const subscribe = (...args) =>
+    Meteor.subscribe(`publication.${suffix}`, ...args);
 
   return {
     create,
@@ -46,6 +47,6 @@ export default (suffix) => {
     remove,
     removeSync,
     subscribe,
-    waitForHandleToBeReady
-  }
-}
+    waitForHandleToBeReady,
+  };
+};

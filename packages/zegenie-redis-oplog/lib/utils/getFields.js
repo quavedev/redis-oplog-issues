@@ -1,4 +1,4 @@
-import { _ } from 'meteor/underscore'
+import { _ } from 'meteor/underscore';
 
 /**
  * Taken from: https://github.com/matb33/meteor-collection-hooks/blob/master/collection-hooks.js#L198 and modified.
@@ -6,8 +6,8 @@ import { _ } from 'meteor/underscore'
  */
 export default function getFields(mutator) {
   // compute modified fields
-  var fields = []
-  var topLevelFields = []
+  var fields = [];
+  var topLevelFields = [];
 
   _.each(mutator, function (params, op) {
     if (op[0] == '$') {
@@ -18,21 +18,21 @@ export default function getFields(mutator) {
           // topLevelFields.push(field.split('.')[0]);
 
           // like { $set: { 'array.1.xx' } }
-          const specificPositionFieldMatch = (/\.[\d]+(\.)?/).exec(field)
-          if (specificPositionFieldMatch) fields.push(field.slice(0, specificPositionFieldMatch.index))
+          const specificPositionFieldMatch = /\.[\d]+(\.)?/.exec(field);
+          if (specificPositionFieldMatch)
+            fields.push(field.slice(0, specificPositionFieldMatch.index));
           else {
             if (field.indexOf('.$') !== -1) {
-              if (field.indexOf('.$.') !== -1) fields.push(field.split('.$.')[0])
-              else fields.push(field.split('.$')[0])
-            }
-            else fields.push(field)
+              if (field.indexOf('.$.') !== -1)
+                fields.push(field.split('.$.')[0]);
+              else fields.push(field.split('.$')[0]);
+            } else fields.push(field);
           }
-          topLevelFields.push(field.split('.')[0])
+          topLevelFields.push(field.split('.')[0]);
         }
-      })
-    }
-    else fields.push(op)
-  })
+      });
+    } else fields.push(op);
+  });
 
-  return {fields, topLevelFields:_.uniq(topLevelFields)}
+  return { fields, topLevelFields: _.uniq(topLevelFields) };
 }

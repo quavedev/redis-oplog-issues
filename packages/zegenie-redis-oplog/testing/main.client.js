@@ -29,8 +29,8 @@ _.each(Collections, (Collection, key) => {
     waitForHandleToBeReady,
   } = helperGenerator(config[key].suffix);
 
-  describe('It should work with: ' + key, function() {
-    it('Should detect a removal', async function(done) {
+  describe('It should work with: ' + key, function () {
+    it('Should detect a removal', async function (done) {
       const handle = subscribe(
         {
           game: 'chess',
@@ -64,7 +64,7 @@ _.each(Collections, (Collection, key) => {
       _id = await createSync({ game: 'chess', title: randomTitle });
     });
 
-    it('Should detect an insert', async function(done) {
+    it('Should detect an insert', async function (done) {
       const handle = subscribe(
         {
           game: 'chess',
@@ -82,7 +82,7 @@ _.each(Collections, (Collection, key) => {
           if (doc.title === 'E') {
             observeChangesHandle.stop();
             handle.stop();
-            remove({ _id: docId }, function() {
+            remove({ _id: docId }, function () {
               done();
             });
           }
@@ -100,7 +100,7 @@ _.each(Collections, (Collection, key) => {
       });
     });
 
-    it('Should detect an update simple', async function(done) {
+    it('Should detect an update simple', async function (done) {
       const handle = subscribe(
         {
           game: 'chess',
@@ -135,7 +135,7 @@ _.each(Collections, (Collection, key) => {
       );
     });
 
-    it('Should detect an update deeply nested', async function(done) {
+    it('Should detect an update deeply nested', async function (done) {
       const docId = await createSync({
         game: 'chess',
         nested: {
@@ -183,7 +183,7 @@ _.each(Collections, (Collection, key) => {
       );
     });
 
-    it('Should not update multiple documents if not specified (multi:true)', async function(done) {
+    it('Should not update multiple documents if not specified (multi:true)', async function (done) {
       const context = Random.id();
       [_id1, _id2] = await createSync([
         { context, game: 'monopoly', title: 'test' },
@@ -206,13 +206,10 @@ _.each(Collections, (Collection, key) => {
         },
       });
 
-      update(
-        { context, game: 'monopoly' },
-        { $set: { score: Math.random() } }
-      );
+      update({ context, game: 'monopoly' }, { $set: { score: Math.random() } });
     });
 
-    it('Should update multiple documents if specified', async function(done) {
+    it('Should update multiple documents if specified', async function (done) {
       const context = 'multi-update';
       [_id1, id2] = await createSync([
         { context, title: 'test' },
@@ -246,7 +243,7 @@ _.each(Collections, (Collection, key) => {
       );
     });
 
-    it('Should detect an update of a non published document', async function(done) {
+    it('Should detect an update of a non published document', async function (done) {
       const _id = await createSync({
         game: 'backgammon',
         title: 'test',
@@ -280,7 +277,7 @@ _.each(Collections, (Collection, key) => {
       update({ _id }, { $set: { game: 'chess', score } });
     });
 
-    it('Should detect an update of a nested field when fields is specified', async function(done) {
+    it('Should detect an update of a nested field when fields is specified', async function (done) {
       const _id = await createSync({
         roles: {
           _groups: ['company1', 'company2', 'company3'],
@@ -313,7 +310,7 @@ _.each(Collections, (Collection, key) => {
       update({ _id }, { $set: { 'roles._main': 'company2' } });
     });
 
-    it('Should update properly a nested field when a positional parameter is used', async function(done) {
+    it('Should update properly a nested field when a positional parameter is used', async function (done) {
       const context = 'positional-paramter';
 
       const _id = await createSync({
@@ -374,9 +371,7 @@ _.each(Collections, (Collection, key) => {
     });
 
     ['server'].forEach((context) => {
-      it('Should work with $and operators: ' + context, async function(
-        done
-      ) {
+      it('Should work with $and operators: ' + context, async function (done) {
         const _id = await createSync({
           orgid: '1',
           siteIds: ['1', '2'],
@@ -429,7 +424,7 @@ _.each(Collections, (Collection, key) => {
       });
     });
 
-    it('Should be able to detect subsequent updates for direct processing with _ids', async function(done) {
+    it('Should be able to detect subsequent updates for direct processing with _ids', async function (done) {
       const [_id1, _id2] = await createSync([
         { subsequent_test: true, name: 'John Smith' },
         { subsequent_test: true, name: 'Michael Willow' },
@@ -471,7 +466,7 @@ _.each(Collections, (Collection, key) => {
       });
     });
 
-    it('Should work with the $addToSet', async function(done) {
+    it('Should work with the $addToSet', async function (done) {
       const _id = await createSync({
         operators: true,
         connections: [1, 2],
@@ -504,7 +499,7 @@ _.each(Collections, (Collection, key) => {
       );
     });
 
-    it('Should work with the $pull', async function(done) {
+    it('Should work with the $pull', async function (done) {
       const _id = await createSync({
         operators: true,
         connections: [1, 2],
@@ -537,7 +532,7 @@ _.each(Collections, (Collection, key) => {
       );
     });
 
-    it('Should work with nested field updates', async function(done) {
+    it('Should work with nested field updates', async function (done) {
       const _id = await createSync({
         profile: {
           language: 'EN',
@@ -572,7 +567,7 @@ _.each(Collections, (Collection, key) => {
       });
     });
 
-    it('Should work with the $pull and $set in combination', async function(done) {
+    it('Should work with the $pull and $set in combination', async function (done) {
       const _id = await createSync({
         test_pull_and_set_combo: true,
         connections: [1],
@@ -618,7 +613,7 @@ _.each(Collections, (Collection, key) => {
       });
     });
 
-    it('Should work properly with limit-sort kind of queries', async function(done) {
+    it('Should work properly with limit-sort kind of queries', async function (done) {
       const context = 'limit-sort-test';
       const limit = 5;
       await removeSync({ context });
@@ -684,7 +679,7 @@ _.each(Collections, (Collection, key) => {
             handle.stop();
             done();
           }
-        }
+        },
       });
 
       initialAddBlast = false;
@@ -712,7 +707,7 @@ _.each(Collections, (Collection, key) => {
       );
     });
 
-    it('Should work with _ids direct processing and other filters present', async function(done) {
+    it('Should work with _ids direct processing and other filters present', async function (done) {
       const context = 'ids-process-test';
       const ids = await createSync([
         { context, meta: { student: false } },
@@ -762,7 +757,7 @@ _.each(Collections, (Collection, key) => {
       });
     });
 
-    it('Should detect an insert with the default processor', async function(done) {
+    it('Should detect an insert with the default processor', async function (done) {
       const context = 'insert-default-processing' + Random.id();
       const handle = subscribe({ context });
 
@@ -785,7 +780,7 @@ _.each(Collections, (Collection, key) => {
       create({ context });
     });
 
-    it('Should detect an update with string publication that should be id', async function(done) {
+    it('Should detect an update with string publication that should be id', async function (done) {
       const context = 'string-filters';
       const _id = await createSync({ context });
       const handle = subscribe(_id);
@@ -807,7 +802,7 @@ _.each(Collections, (Collection, key) => {
       update(_id, { $set: { number: 10 } });
     });
 
-    it('Should work with deep nest specified fields', async function(done) {
+    it('Should work with deep nest specified fields', async function (done) {
       const context = 'edge-case-001';
 
       const _id = await createSync({
@@ -845,7 +840,7 @@ _.each(Collections, (Collection, key) => {
       });
     });
 
-    it('Should work with upsert', async function(done) {
+    it('Should work with upsert', async function (done) {
       const context = 'upsertion' + Random.id();
       const handle = subscribe({ context });
 
@@ -881,7 +876,7 @@ _.each(Collections, (Collection, key) => {
       );
     });
 
-    it('Should not detect a change if pushToRedis is false', async function(done) {
+    it('Should not detect a change if pushToRedis is false', async function (done) {
       const context = 'pushToRedis:false';
       const handle = subscribe({ context });
 
@@ -932,7 +927,7 @@ _.each(Collections, (Collection, key) => {
       }, 200);
     });
 
-    it('Should work correctly when disallowed fields are specified', async function(done) {
+    it('Should work correctly when disallowed fields are specified', async function (done) {
       const context = 'disallowed-fields-' + Random.id();
       const handle = subscribe(
         { context },
@@ -1003,7 +998,7 @@ _.each(Collections, (Collection, key) => {
       });
     });
 
-    it('Should work correctly with the allowed fields only specified', async function(done) {
+    it('Should work correctly with the allowed fields only specified', async function (done) {
       const context = 'allowed-fields';
       const handle = subscribe(
         { context },
@@ -1069,7 +1064,7 @@ _.each(Collections, (Collection, key) => {
       });
     });
 
-    it('Should work with limit-sort when only _id is specified', async function(done) {
+    it('Should work with limit-sort when only _id is specified', async function (done) {
       const context = Random.id();
       const handle = subscribe(
         { context },
@@ -1102,9 +1097,7 @@ _.each(Collections, (Collection, key) => {
           done();
         },
         changed(docId, doc) {
-          done(
-            'Should not be in changed event because nothing changed'
-          );
+          done('Should not be in changed event because nothing changed');
         },
       });
 
@@ -1114,7 +1107,7 @@ _.each(Collections, (Collection, key) => {
       });
     });
 
-    it('Should work properly with $unset', async function(done) {
+    it('Should work properly with $unset', async function (done) {
       const context = 'test-$unset';
       const handle = subscribe({ context });
 
@@ -1152,7 +1145,7 @@ _.each(Collections, (Collection, key) => {
       });
     });
 
-    it('Should work when updating deep array when it is specified as a field', async function(done) {
+    it('Should work when updating deep array when it is specified as a field', async function (done) {
       const context = `deep-array-objects-${Random.id()}`;
 
       const handle = subscribe(
@@ -1209,7 +1202,7 @@ _.each(Collections, (Collection, key) => {
       });
     });
 
-    it('Should work when updating a specific element in an array', async function(done) {
+    it('Should work when updating a specific element in an array', async function (done) {
       const context = 'update-specific-in-arrays';
 
       const handle = subscribe(
@@ -1263,7 +1256,7 @@ _.each(Collections, (Collection, key) => {
       });
     });
 
-    it('Should work with $elemMatch query selector', async function(done) {
+    it('Should work with $elemMatch query selector', async function (done) {
       const context = 'work-with-elemMatch-' + Random.id();
 
       const handle = subscribe({
@@ -1300,7 +1293,7 @@ _.each(Collections, (Collection, key) => {
       });
     });
 
-    it('Should detect 3rd level nesting changes', async function(done) {
+    it('Should detect 3rd level nesting changes', async function (done) {
       const context = 'deep-level-nesting-' + Random.id();
 
       const handle = subscribe({
@@ -1337,7 +1330,7 @@ _.each(Collections, (Collection, key) => {
       });
     });
 
-    it('Should work with a filter on a subfield and a top field specified', async function(done) {
+    it('Should work with a filter on a subfield and a top field specified', async function (done) {
       _id = await createSync({
         master: {
           sub: 'TEST',

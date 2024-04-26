@@ -2,7 +2,7 @@ import { Mongo } from 'meteor/mongo';
 import { _ } from 'meteor/underscore';
 // eslint-disable-next-line
 import { RedisOplog } from 'meteor/cultofcoders:redis-oplog';
-import { Meteor } from 'meteor/meteor'
+import { Meteor } from 'meteor/meteor';
 
 if (Meteor.isServer) {
   RedisOplog.init({
@@ -44,12 +44,12 @@ if (Meteor.isServer) {
       remove: () => false,
     });
 
-    Meteor.publish(`publication.${config[key].suffix}`, function(
-      filters,
-      options
-    ) {
-      return Collection.find(filters, _.extend({}, options, opts[key]));
-    });
+    Meteor.publish(
+      `publication.${config[key].suffix}`,
+      function (filters, options) {
+        return Collection.find(filters, _.extend({}, options, opts[key]));
+      }
+    );
 
     Meteor.methods({
       [`create.${config[key].suffix}`](item, options = {}) {
@@ -79,11 +79,8 @@ if (Meteor.isServer) {
         );
       },
       [`remove.${config[key].suffix}`](selectors, options = {}) {
-        return Collection.remove(
-          selectors,
-          _.extend(options, opts[key])
-        );
-      }
+        return Collection.remove(selectors, _.extend(options, opts[key]));
+      },
     });
   });
 }

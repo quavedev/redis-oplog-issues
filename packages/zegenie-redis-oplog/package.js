@@ -8,16 +8,16 @@ Package.describe({
   git: 'https://github.com/ramezrafla/redis-oplog',
   // By default, Meteor will default to using README.md for documentation.
   // To avoid submitting documentation, set this field to null.
-  documentation: 'README.md'
-})
+  documentation: 'README.md',
+});
 
 // eslint-disable-next-line
 Npm.depends({
-  redis: '3.0.0'
-})
+  redis: '3.0.0',
+});
 
 // eslint-disable-next-line
-Package.onUse(function(api) {
+Package.onUse(function (api) {
   api.use([
     'underscore',
     'ecmascript',
@@ -29,36 +29,36 @@ Package.onUse(function(api) {
     'diff-sequence',
     'id-map',
     'mongo-id',
-    'tracker'
-  ])
+    'tracker',
+  ]);
 
   api.mainModule('redis-oplog.js', 'server');
   api.mainModule('redis-oplog.client.js', 'client');
-})
+});
 
 // eslint-disable-next-line
-Package.onTest(function(api) {
-  api.use('zegenie:redis-oplog')
+Package.onTest(function (api) {
+  api.use('zegenie:redis-oplog');
 
   // extensions
-  api.use('aldeed:collection2@3.0.0')
-  api.use('reywood:publish-composite@1.5.2')
-  api.use('natestrauser:publish-performant-counts@0.1.2')
-  api.use('socialize:user-presence@0.4.0')
+  api.use('aldeed:collection2@3.0.0');
+  api.use('reywood:publish-composite@1.5.2');
+  api.use('natestrauser:publish-performant-counts@0.1.2');
+  api.use('socialize:user-presence@0.4.0');
 
-  api.use('ecmascript')
-  api.use('tracker')
-  api.use('mongo')
-  api.use('random')
-  api.use('accounts-password')
-  api.use('matb33:collection-hooks@0.8.4')
-  api.use('alanning:roles@1.2.16')
+  api.use('ecmascript');
+  api.use('tracker');
+  api.use('mongo');
+  api.use('random');
+  api.use('accounts-password');
+  api.use('matb33:collection-hooks@0.8.4');
+  api.use('alanning:roles@1.2.16');
 
-  api.use(['meteortesting:mocha'])
+  api.use(['meteortesting:mocha']);
 
-  api.mainModule('testing/main.server.js', 'server')
-  api.addFiles('testing/publishComposite/boot.js', 'server')
-  api.addFiles('testing/optimistic-ui/boot.js', 'server')
+  api.mainModule('testing/main.server.js', 'server');
+  api.addFiles('testing/publishComposite/boot.js', 'server');
+  api.addFiles('testing/optimistic-ui/boot.js', 'server');
 
-  api.mainModule('testing/main.client.js', 'client')
-})
+  api.mainModule('testing/main.client.js', 'client');
+});

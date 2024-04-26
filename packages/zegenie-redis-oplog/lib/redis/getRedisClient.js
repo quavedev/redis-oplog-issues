@@ -1,12 +1,12 @@
 // eslint-disable-next-line
-import redis from 'redis'
-import Config from '../config'
-import { _ } from 'meteor/underscore'
-import { Meteor } from 'meteor/meteor'
+import redis from 'redis';
+import Config from '../config';
+import { _ } from 'meteor/underscore';
+import { Meteor } from 'meteor/meteor';
 
 // Redis requires two connections for pushing and listening to data
-let redisPusher
-let redisListener
+let redisPusher;
+let redisListener;
 
 /**
  * Returns the pusher for events in Redis
@@ -14,8 +14,11 @@ let redisListener
  * @returns {*}
  */
 export function getRedisPusher() {
-  if (!redisPusher) redisPusher = redis.createClient(_.extend({}, Config.redis, { retry_strategy: getRetryStrategy() }))
-  return redisPusher
+  if (!redisPusher)
+    redisPusher = redis.createClient(
+      _.extend({}, Config.redis, { retry_strategy: getRetryStrategy() })
+    );
+  return redisPusher;
 }
 
 /**
@@ -24,13 +27,15 @@ export function getRedisPusher() {
  * @param onConnect
  * @returns {*}
  */
-export function getRedisListener({onConnect} = {}) {
+export function getRedisListener({ onConnect } = {}) {
   if (!redisListener) {
-    redisListener = redis.createClient(_.extend({}, Config.redis, { retry_strategy: getRetryStrategy() }))
+    redisListener = redis.createClient(
+      _.extend({}, Config.redis, { retry_strategy: getRetryStrategy() })
+    );
     // we only attach events here
-    attachEvents(redisListener, {onConnect})
+    attachEvents(redisListener, { onConnect });
   }
-  return redisListener
+  return redisListener;
 }
 
 /**
@@ -38,13 +43,17 @@ export function getRedisListener({onConnect} = {}) {
  * @param client
  * @param onConnect
  */
-function attachEvents(client, {onConnect}) {
+function attachEvents(client, { onConnect }) {
   ['connect', 'reconnecting', 'error', 'end'].forEach((fn) => {
-    redisListener.on(fn, Meteor.bindEnvironment(function (...args) {
-      if (fn === 'connect' && onConnect) onConnect()
-      if (Config.redisExtras.events[fn]) return Config.redisExtras.events[fn](...args)
-    }))
-  })
+    redisListener.on(
+      fn,
+      Meteor.bindEnvironment(function (...args) {
+        if (fn === 'connect' && onConnect) onConnect();
+        if (Config.redisExtras.events[fn])
+          return Config.redisExtras.events[fn](...args);
+      })
+    );
+  });
 }
 
 /**
@@ -52,7 +61,8 @@ function attachEvents(client, {onConnect}) {
  * @returns {Function}
  */
 function getRetryStrategy() {
-  return function(...args) {
-    if (Config.redisExtras.retry_strategy) return Config.redisExtras.retry_strategy(...args)
-  }
+  return function (...args) {
+    if (Config.redisExtras.retry_strategy)
+      return Config.redisExtras.retry_strategy(...args);
+  };
 }

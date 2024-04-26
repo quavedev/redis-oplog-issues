@@ -1,5 +1,5 @@
-import { Meteor } from 'meteor/meteor'
+import { Meteor } from 'meteor/meteor';
 
-const OptimisticInvocation = new Meteor.EnvironmentVariable()
+const OptimisticInvocation = new Meteor.EnvironmentVariable();
 
-export default OptimisticInvocation
+export default OptimisticInvocation;
