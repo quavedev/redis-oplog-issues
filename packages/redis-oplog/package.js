@@ -1,5 +1,5 @@
 Package.describe({
-  name: 'lempire:redis-oplog',
+  name: 'cultofcoders:redis-oplog',
   version: '2.2.1',
   // Brief, one-line summary of the package.
   summary: "Replacement for Meteor's MongoDB oplog implementation",
