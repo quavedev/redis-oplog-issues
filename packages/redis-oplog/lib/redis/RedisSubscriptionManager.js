@@ -27,7 +27,7 @@ class RedisSubscriptionManager {
     let redisSubscribers = [];
     for (let channel in this.store) {
       this.store[channel].forEach((_redisSubscriber) =>
-        redisSubscribers.push(_redisSubscriber)
+          redisSubscribers.push(_redisSubscriber)
       );
     }
 
@@ -57,7 +57,7 @@ class RedisSubscriptionManager {
       _.each(redisSubscriber.channels, (channel) => {
         if (!this.store[channel]) {
           return debug(
-            '[RedisSubscriptionManager] Trying to detach a subscriber on a non existent channels.'
+              '[RedisSubscriptionManager] Trying to detach a subscriber on a non existent channels.'
           );
         } else {
           this.store[channel] = _.without(this.store[channel], redisSubscriber);
@@ -140,18 +140,11 @@ class RedisSubscriptionManager {
 
     let isSynthetic = data[RedisPipe.SYNTHETIC];
 
-    console.log(`isSynthetic`);
-
     debug(
-      `[RedisSubscriptionManager] Received ${
-        isSynthetic ? 'synthetic ' : ''
-      }event: "${data[RedisPipe.EVENT]}" to "${channel}"`
+        `[RedisSubscriptionManager] Received ${
+            isSynthetic ? 'synthetic ' : ''
+        }event: "${data[RedisPipe.EVENT]}" to "${channel}"`
     );
-    getAdvancedDebug('redis-oplog')({
-      log: 'subscriber ',
-      docId: data?.d?._id,
-      channel,
-    });
     if (subscribers.length === 0) {
       getAdvancedDebug('redis-oplog')({
         log: 'empty subscriber ',
@@ -192,13 +185,13 @@ class RedisSubscriptionManager {
       subscribers.forEach((redisSubscriber) => {
         try {
           redisSubscriber.process(
-            data[RedisPipe.EVENT],
-            doc,
-            data[RedisPipe.FIELDS]
+              data[RedisPipe.EVENT],
+              doc,
+              data[RedisPipe.FIELDS]
           );
         } catch (e) {
           debug(
-            `[RedisSubscriptionManager] Exception while processing event: ${e.toString()}`
+              `[RedisSubscriptionManager] Exception while processing event: ${e.toString()}`
           );
         }
       });
@@ -212,14 +205,14 @@ class RedisSubscriptionManager {
             data,
           });
           redisSubscriber.processSynthetic(
-            data[RedisPipe.EVENT],
-            data[RedisPipe.DOC],
-            data[RedisPipe.MODIFIER],
-            data[RedisPipe.MODIFIED_TOP_LEVEL_FIELDS]
+              data[RedisPipe.EVENT],
+              data[RedisPipe.DOC],
+              data[RedisPipe.MODIFIER],
+              data[RedisPipe.MODIFIED_TOP_LEVEL_FIELDS]
           );
         } catch (e) {
           debug(
-            `[RedisSubscriptionManager] Exception while processing synthetic event: ${e.toString()}`
+              `[RedisSubscriptionManager] Exception while processing synthetic event: ${e.toString()}`
           );
         }
       });
@@ -242,8 +235,8 @@ class RedisSubscriptionManager {
     });
 
     if (
-      collection._redisOplog &&
-      !collection._redisOplog.protectAgainstRaceConditions
+        collection._redisOplog &&
+        !collection._redisOplog.protectAgainstRaceConditions
     ) {
       // If there's no protection against race conditions
       // It means we have received the full doc in doc
