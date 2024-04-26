@@ -22,8 +22,6 @@ const allowedOptions = [
   'namespaces',
 ];
 
-const { Matcher } = Minimongo;
-
 export default class ObservableCollection {
   /**
    * Instantiate the collection
@@ -142,15 +140,23 @@ export default class ObservableCollection {
    */
   isEligible(doc) {
     if (this.matcher) {
+      const { result } = this.matcher.documentMatches(doc);
       getAdvancedDebug('redis-oplog')({
-        log: 'isEligible',
+        log: 'isEligible with matcher',
         doc,
         docId: doc?._id,
         matcher: this.matcher,
+        result,
       });
-      return this.matcher.documentMatches(doc).result;
+      return result;
     }
 
+    getAdvancedDebug('redis-oplog')({
+      log: 'isEligible has no matcher',
+      doc,
+      docId: doc?._id,
+      result: true,
+    });
     return true;
   }
 
@@ -264,6 +270,9 @@ export default class ObservableCollection {
     var projectedOld = this._projectionFn(oldDoc);
 
     var changed = DiffSequence.makeChangedFields(projectedNew, projectedOld);
+
+    const changedIsEmpty = _.isEmpty(changed);
+
     getAdvancedDebug('redis-oplog')({
       log: 'ObservableCollection changed values',
       doc,
@@ -272,14 +281,28 @@ export default class ObservableCollection {
       projectedNew,
       projectedOld,
       changed,
+      changedIsEmpty,
     });
 
-    if (Meteor.settings.public?.redisOplogForceChange) {
+    if (!changedIsEmpty) {
       this.multiplexer.changed(docId, changed);
-    } else {
-      if (!_.isEmpty(changed)) {
-        this.multiplexer.changed(docId, changed);
-      }
+      return;
+    }
+
+    // custom code from Lempire
+    if (Meteor.settings.public?.redisOplogForceChange) {
+      getAdvancedDebug('redis-oplog')({
+        log: 'ObservableCollection changed values multiplexer changed redisOplogForceChange',
+        redisOplogForceChange: true,
+        doc,
+        docId: doc?._id,
+        modifiedFields,
+        projectedNew,
+        projectedOld,
+        changed,
+        changedIsEmpty,
+      });
+      this.multiplexer.changed(docId, changed);
     }
   }
 

@@ -1,0 +1,10 @@
+{
+  "name": "redis-oplog",
+  "version": "1.0.0",
+  "scripts": {
+    "quave-prettier": "prettier --write \"**/*.js\""
+  },
+  "devDependencies": {
+    "prettier": "^3.2.5"
+  }
+}
