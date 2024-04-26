@@ -14,10 +14,6 @@ const getRedisOplogConfigJsonOrNull = () => {
 
 const logMessage = (...args) => {
     try {
-        if(Meteor.isClient) {
-            window.log(...args);
-            return;
-        }
         log(...args);
     } catch (error) {
         // we don't want to log error, ReferenceError will happen in the startup of ddp-server
