@@ -27,6 +27,7 @@ const logError = (...args) => {
 
 function getObserveKeyFields(observeKeyString) {
   try {
+    if (!observeKeyString) return {};
     const observeKey = JSON.parse(observeKeyString);
     return {
       ...(observeKey.collectionName && {
