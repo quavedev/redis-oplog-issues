@@ -25,6 +25,26 @@ const logError = (...args) => {
   logMessage(...args);
 };
 
+function getObserveKeyFields(observeKeyString) {
+  try {
+    const observeKey = JSON.parse(observeKeyString);
+    return {
+      ...(observeKey.collectionName && {
+        collectionName: observeKey.collectionName,
+      }),
+      ...(observeKey?.selector?.teamId && {
+        teamId: observeKey.selector.teamId,
+      }),
+      ...(observeKey?._id &&
+        observeKey?._id?.$in?.[0] && {
+          observerFirstId: observeKey._id && observeKey._id.$in[0],
+        }),
+    };
+  } catch (e) {
+    return {};
+  }
+}
+
 export const getAdvancedDebug =
   (currentPackage) =>
   /**
@@ -46,6 +66,7 @@ export const getAdvancedDebug =
 
     const dataIsEmpty = !Object.keys(data).length;
 
+    const observeKeyFields = getObserveKeyFields(data.observeKey) || {};
     const preparedData = {
       ...data,
       ...(data.cursorDescription && {
@@ -62,6 +83,7 @@ export const getAdvancedDebug =
           sort: data.cursorDescription.options.sort,
         }),
       }),
+      ...observeKeyFields,
     };
 
     const {
