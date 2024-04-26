@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
 import { _ } from 'meteor/underscore';
+import debug from '../debug';
 import { getAdvancedDebug } from 'meteor/advanced-debug';
 import { RedisPipe, Events } from '../constants';
 import getFieldsOfInterestFromAll from './lib/getFieldsOfInterestFromAll';
